@@ -106,4 +106,4 @@ Function partials (commands, helpers) are testable via the tests module:
 - [gotchas.md](gotchas.md) — errors and limits
 - [Testing](../testing/README.md) — testing partials
 - [Caching](../caching/README.md) — caching partial output
-- [Modules](../modules/core/README.md) — module override mechanism
+- [Modules](../modules/template/README.md) — module reference template

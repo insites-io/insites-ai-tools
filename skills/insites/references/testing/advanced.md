@@ -1,310 +1,137 @@
 # Advanced Testing Techniques
 
-## Test-Driven Development Pattern
+## Multi-Scenario Test Files
 
-### Write Tests First
-
-```liquid
-{% test 'user registration workflow' %}
-  {% graphql 'register_user' %}
-    mutation RegisterUser($email: String!, $password: String!) {
-      userRegister(email: $email, password: $password) {
-        user {
-          id
-          email
-          createdAt
-        }
-      }
-    }
-  {% endgraphql %}
-
-  {% assert register_user.user valid_object %}
-  {% assert register_user.user.email == 'new@example.com' %}
-{% endtest %}
-```
-
-### Verify Test Fails First
-
-Ensure test fails before implementing feature:
-
-```bash
-insites-cli test run dev
-# Should show failure
-```
-
-## Mocking and Stubbing
-
-### Mock External API Responses
+A single test file can contain multiple comment-separated test scenarios. Each scenario sets up data and adds assertions to the shared contract:
 
 ```liquid
-{% test 'payment with mock api' %}
-  {% if context.constants.MOCK_PAYMENTS == 'true' %}
-    <!-- Use mock response -->
-    {% assign payment_response = 'success' %}
-  {% else %}
-    <!-- Call real API -->
-    {% api_call 'process_payment' %}
-      to: 'https://api.payment.com/process'
-      format: 'json'
-      request_type: 'POST'
-    {% endapi_call %}
-    {% assign payment_response = payment_response.status %}
-  {% endif %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
+%}
 
-  {% assert payment_response == 'success' %}
-{% endtest %}
+{% comment %} Scenario 1: Valid input {% endcomment %}
+{% liquid
+  assign data = '{ "email": "valid@example.com", "body": "Hello" }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: contact, field_name: 'valid_contact'
+  function contract = 'modules/tests/assertions/blank', contract: contract, object: contact, field_name: 'errors'
+%}
+
+{% comment %} Scenario 2: Invalid email {% endcomment %}
+{% liquid
+  assign data = '{ "email": "not-an-email", "body": "Hello" }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  function contract = 'modules/tests/assertions/not_valid_object', contract: contract, object: contact, field_name: 'invalid_email_contact'
+  function contract = 'modules/tests/assertions/presence', contract: contract, object: contact.errors, field_name: 'email'
+%}
+
+{% comment %} Scenario 3: Missing required fields {% endcomment %}
+{% liquid
+  assign data = '{ "email": "", "body": "" }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  function contract = 'modules/tests/assertions/not_valid_object', contract: contract, object: contact, field_name: 'empty_contact'
+%}
+
+{% liquid
+  return contract
+%}
 ```
 
-### Conditional Test Data
+## Email Testing
+
+Test that actions trigger emails, then inspect them via the test module's endpoints:
 
 ```liquid
-{% test 'order processing with test data' %}
-  {% if context.environment == 'testing' %}
-    <!-- Use test data -->
-    {% assign test_order = 'test_order_123' %}
-  {% else %}
-    <!-- Use real data -->
-    {% graphql 'fetch_order' %}
-      query { lastOrder { id } }
-    {% endgraphql %}
-    {% assign test_order = lastOrder.id %}
-  {% endif %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% assert test_order != blank %}
-{% endtest %}
+  # Trigger an action that sends email
+  function result = 'commands/notifications/send_welcome', user_id: user.id
+
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: result, field_name: 'welcome_email_sent'
+
+  return contract
+%}
 ```
 
-## Property-Based Testing
+Inspect sent emails at `/_tests/sent_mails` and `/_tests/sent_mails/:id`.
 
-### Generate Test Cases
+## Custom Assertions
+
+When built-in assertions are insufficient, use `register_error` to add custom validation:
 
 ```liquid
-{% test 'email validation with multiple formats' %}
-  {% assign test_emails = 'user@example.com,test+tag@domain.co.uk,name.last@company.org' | split: ',' %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% for email in test_emails %}
-    {% assert email contains '@' %}
-  {% endfor %}
-{% endtest %}
+  function result = 'commands/products/create', object: data
+
+  # Custom: verify price is within range
+  assign price = result.price | plus: 0
+  if price < 0
+    function contract = 'modules/tests/helpers/register_error', contract: contract, field_name: 'price_range', message: 'Price must not be negative'
+  endif
+  if price > 999999
+    function contract = 'modules/tests/helpers/register_error', contract: contract, field_name: 'price_max', message: 'Price exceeds maximum'
+  endif
+
+  return contract
+%}
 ```
 
-### Boundary Testing
+## Debugging Failing Tests
+
+### Step-by-step protocol
+
+1. Run the specific failing test:
+   ```bash
+   insites-cli test run staging -n test/commands/users/create_test
+   ```
+
+2. Check JSON output for assertion details:
+   ```
+   /_tests/run.js?name=test/commands/users/create_test
+   ```
+
+3. Add `{% log %}` statements and watch logs:
+   ```bash
+   insites-cli logsv2 staging
+   ```
+
+4. In the test file, log intermediate values:
+   ```liquid
+   {% liquid
+     function result = 'commands/users/create', object: data
+     log result, type: 'debug'
+   %}
+   ```
+
+## Test Data Isolation
+
+Tests run on staging, so test data shares the database. Best practices:
+
+- Use unique identifiers (e.g., timestamp-based emails) to avoid collisions
+- Clean up created records after testing when possible
+- Never depend on specific record IDs existing
 
 ```liquid
-{% test 'price boundaries' %}
-  {% assign prices = '-10,0,1,999999.99' | split: ',' %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% for price in prices %}
-    {% assign price_num = price | to_number %}
+  # Use unique email to avoid collisions
+  assign now = 'now' | date: '%s'
+  assign test_email = 'test-' | append: now | append: '@example.com'
 
-    {% if price_num > 0 %}
-      {% assert true %}
-    {% else %}
-      {% assert false %}
-    {% endif %}
-  {% endfor %}
-{% endtest %}
-```
+  assign data = '{}' | parse_json | hash_merge: email: test_email, name: 'Test User'
+  function result = 'commands/users/create', object: data
 
-## Integration Testing Advanced
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: result, field_name: 'user'
 
-### Full User Journey Testing
-
-```liquid
-{% test 'complete purchase flow' %}
-  <!-- Step 1: Create user -->
-  {% graphql 'create_user' %}
-    mutation { userCreate(email: "test@example.com") { user { id } } }
-  {% endgraphql %}
-  {% assign user_id = create_user.user.id %}
-  {% assert user_id != blank %}
-
-  <!-- Step 2: Add to cart -->
-  {% graphql 'add_cart' %}
-    mutation { cartAdd(userId: {{ user_id }}, productId: 1) { success } }
-  {% endgraphql %}
-  {% assert add_cart.success %}
-
-  <!-- Step 3: Process payment -->
-  {% api_call 'process_payment' %}
-    to: 'https://api.payment.com/charge'
-    format: 'json'
-    request_type: 'POST'
-  {% endapi_call %}
-  {% assert process_payment.status == 200 %}
-
-  <!-- Step 4: Verify order -->
-  {% graphql 'get_order' %}
-    query { userOrder(userId: {{ user_id }}) { status } }
-  {% endgraphql %}
-  {% assert get_order.userOrder.status == 'completed' %}
-{% endtest %}
-```
-
-### Multi-Step Workflows
-
-```liquid
-{% test 'order to shipment workflow' %}
-  <!-- Create order -->
-  {% graphql 'order_create' %}
-    mutation { orderCreate(items: [{productId: 1, qty: 2}]) { orderId } }
-  {% endgraphql %}
-
-  <!-- Confirm order -->
-  {% graphql 'order_confirm' %}
-    mutation { orderConfirm(orderId: {{ order_create.orderId }}) { confirmed } }
-  {% endgraphql %}
-
-  <!-- Process shipment -->
-  {% graphql 'shipment_create' %}
-    mutation { shipmentCreate(orderId: {{ order_create.orderId }}) { trackingId } }
-  {% endgraphql %}
-
-  {% assert shipment_create.trackingId != blank %}
-{% endtest %}
-```
-
-## Performance Testing
-
-### Benchmarking Code Paths
-
-```liquid
-{% test 'query performance' %}
-  {% assign start_time = 'now' | date: '%s.%N' %}
-
-  {% graphql 'large_query' %}
-    query {
-      products(limit: 1000) {
-        id
-        name
-        price
-      }
-    }
-  {% endgraphql %}
-
-  {% assign end_time = 'now' | date: '%s.%N' %}
-  {% assign duration = end_time | minus: start_time %}
-
-  <!-- Assert query completes within timeout -->
-  {% assign max_duration = 5 %}
-  {% assert duration < max_duration %}
-{% endtest %}
-```
-
-## Data Integrity Testing
-
-### Complex Object Validation
-
-```liquid
-{% test 'order data integrity' %}
-  {% graphql 'fetch_order' %}
-    query GetOrder($id: ID!) {
-      order(id: $id) {
-        id
-        user { id email }
-        items { id productId qty price }
-        total
-        status
-        createdAt
-      }
-    }
-  {% endgraphql %}
-
-  {% assign order = fetch_order.order %}
-
-  <!-- Validate structure -->
-  {% assert order valid_object %}
-  {% assert order.id != blank %}
-  {% assert order.user valid_object %}
-
-  <!-- Validate relationships -->
-  {% assert order.items != blank %}
-  {% assign item_count = order.items | size %}
-  {% assert item_count > 0 %}
-
-  <!-- Validate calculations -->
-  {% assign calculated_total = 0 %}
-  {% for item in order.items %}
-    {% assign item_total = item.price | times: item.qty %}
-    {% assign calculated_total = calculated_total | plus: item_total %}
-  {% endfor %}
-  {% assert calculated_total == order.total %}
-{% endtest %}
-```
-
-## Concurrent Testing Pattern
-
-### Parallel Test Execution
-
-```bash
-#!/bin/bash
-# Run multiple test suites in parallel
-
-(insites-cli test run dev --filter "user" &) &
-(insites-cli test run dev --filter "product" &) &
-(insites-cli test run dev --filter "order" &) &
-
-wait
-
-echo "All test suites completed"
-```
-
-## Regression Testing
-
-### Maintain Test Registry
-
-```liquid
-{% test 'regression: critical features' %}
-  <!-- Login functionality -->
-  {% graphql 'auth_test' %}
-    mutation { userLogin(email: "test@example.com", password: "pass") { success } }
-  {% endgraphql %}
-  {% assert auth_test.success %}
-
-  <!-- Payment processing -->
-  {% api_call 'payment_test' %}
-    to: 'https://api.payment.com/test'
-    format: 'json'
-    request_type: 'POST'
-  {% endapi_call %}
-  {% assert payment_test.status == 200 %}
-
-  <!-- Data export -->
-  {% graphql 'export_test' %}
-    query { exportData(type: "users") { success } }
-  {% endgraphql %}
-  {% assert export_test.success %}
-{% endtest %}
-```
-
-## Test Organization at Scale
-
-### Suites by Domain
-
-```
-app/lib/test/
-├── auth_test.liquid
-├── users_test.liquid
-├── products_test.liquid
-├── orders_test.liquid
-├── payments_test.liquid
-├── shipping_test.liquid
-└── admin_test.liquid
-```
-
-### Master Test File
-
-```liquid
-<!-- app/lib/test/master_test.liquid -->
-{% test 'master contract validation' %}
-  <!-- Import and validate all domains -->
-  {% include 'test/auth' %}
-  {% include 'test/users' %}
-  {% include 'test/products' %}
-  {% include 'test/orders' %}
-
-  {% assert all_tests_passed %}
-{% endtest %}
+  return contract
+%}
 ```
 
 ## See Also

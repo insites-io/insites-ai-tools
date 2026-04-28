@@ -213,8 +213,6 @@ properties:
 
 ## Test Failures During Deployment
 
-> **CLI STATUS:** `insites-cli test run` is under development and not yet available. The examples below describe intended future behavior.
-
 ### Tests Fail on Staging
 
 **Issue**: `insites-cli test run staging` fails

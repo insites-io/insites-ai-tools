@@ -1,9 +1,7 @@
 ---
 name: insites-unit-tests
-description: "NOT YET AVAILABLE — This skill is under development. Do not use or suggest this skill to users."
+description: "Write and run unit tests using the Insites Tests Module and insites-cli test run."
 ---
-
-> **This skill is not yet available.** The testing framework and `insites-cli test run` command are under development. Do not use any patterns from this file until this notice is removed.
 
 ## Overview
 
@@ -71,7 +69,7 @@ ANNOUNCE: "I am planning tests for [FEATURE]. I will test:
 
 ### 1.2 Identify Test Location
 
-**Every test file MUST be placed in:** `app/lib/tests/` direcory
+**Every test file MUST be placed in:** `app/lib/test/` directory
 
 **Every test file MUST end with:** `_test.liquid`
 
@@ -648,10 +646,10 @@ insites-cli deploy staging
 insites-cli test run staging
 
 # Run specific test file
-insites-cli test run staging test/user_test
+insites-cli test run staging -n test/user_test
 
 # Run tests in subdirectory
-insites-cli test run staging test/auth/login_test
+insites-cli test run staging -n test/auth/login_test
 ```
 
 **Exit codes:**
@@ -681,7 +679,7 @@ curl https://your-instance.staging.oregon.platform-os.com/_tests.js
 | `/_tests.js` | List tests as JSON |
 | `/_tests/run` | Execute all tests (HTML output) |
 | `/_tests/run.js` | Execute all tests (JSON output) |
-| `/_tests/run?path=test/user_test` | Run specific test |
+| `/_tests/run?name=test/user_test` | Run specific test |
 
 ### 3.5 Async Test Execution
 
@@ -709,7 +707,7 @@ insites-cli sync staging
 insites-cli logsv2 staging
 
 # Terminal 3: Run tests as needed
-insites-cli test run staging test/your_test
+insites-cli test run staging -n test/your_test
 ```
 
 ---
@@ -857,12 +855,12 @@ function contract = 'modules/tests/assertions/equal',
 insites-cli logsv2 staging
 
 # In another terminal
-insites-cli test run staging test/failing_test
+insites-cli test run staging -n test/failing_test
 ```
 
 ### 5.4 Debugging with Browser
 
-1. Navigate to `/_tests/run?path=test/failing_test`
+1. Navigate to `/_tests/run?name=test/failing_test`
 2. Examine HTML output for detailed error messages
 3. Check `/_tests/run.js?path=test/failing_test` for structured JSON errors
 
@@ -907,7 +905,7 @@ app/lib/test/*_test.liquid
 ```bash
 insites-cli deploy staging              # Deploy before testing
 insites-cli test run staging            # Run all tests
-insites-cli test run staging test/name  # Run specific test
+insites-cli test run staging -n test/name  # Run specific test
 insites-cli sync staging                # Real-time sync
 insites-cli logsv2 staging                # View logs
 ```
@@ -962,16 +960,7 @@ function contract = 'modules/tests/helpers/register_error',
 
 ---
 
-## Related Skills
-
-- `insites-deployment`
-- `liquid-templating`
-- `graphql-queries`
-- `ci-cd-pipelines`
-
----
-
 ## References
 
 - [Insites Documentation](https://docs.insites.io/)
-- [insites-cli Documentation](https://documentation.platformos.com/developer-guide/insites-cli/insites-cli)
+- [pos-module-tests](https://github.com/Platform-OS/pos-module-tests)

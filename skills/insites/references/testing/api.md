@@ -2,278 +2,209 @@
 
 ## Test Execution
 
-### Browser-Based Testing
-
-Run tests through web interface:
-
-```
-GET http://localhost:3000/_tests/run
-```
-
-Returns HTML with test results:
-- Visual test status
-- Pass/fail indicators
-- Assertion details
-- Execution time
-
 ### CLI Test Execution
 
-Run tests from command line:
-
 ```bash
-insites-cli test run [environment]
+# Run all tests
+insites-cli test run <environment>
 insites-cli test run staging
-insites-cli test run dev
+
+# Run a specific test
+insites-cli test run <environment> -n <test-name>
+insites-cli test run staging -n test/commands/contacts/create_test
 ```
 
-### Verbose Testing
+Exit codes:
+- `0` = All tests passed
+- Non-zero = Test failures occurred
 
-Enable detailed output:
+### Browser-Based Testing
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/_tests` | List all available test files |
+| `/_tests.js` | List tests as JSON |
+| `/_tests/run` | Execute all tests (HTML output) |
+| `/_tests/run.js` | Execute all tests (JSON output) |
+| `/_tests/run?name=test/user_test` | Run specific test |
+| `/_tests/run.js?name=test/user_test` | Run specific test (JSON) |
+
+### Async Test Execution
+
+For long-running test suites:
+
+```
+GET /_tests/run_async
+```
+
+Monitor via logs:
 
 ```bash
-insites-cli test run staging --verbose
-insites-cli test run dev --verbose --filter "user"
+insites-cli logsv2 staging
 ```
 
-## Test Framework Syntax
+## Contract & Assertion API
 
-### Test Block
+### Contract Initialization
 
-Define a test:
+Every test must start with:
 
 ```liquid
-{% test 'test name' %}
-  <!-- test code here -->
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
+%}
 ```
 
 ### Assertions
 
-#### valid_object
-
-Verify object existence:
-
-```liquid
-{% test 'user exists' %}
-  {% assign user = context.current_user %}
-  {% assert user valid_object %}
-{% endtest %}
-```
+All assertions follow the same pattern — they accept `contract` and return an updated `contract`.
 
 #### equal
 
-Compare values for equality:
+Compare two values for exact equivalence:
 
 ```liquid
-{% test 'name matches' %}
-  {% assign name = 'John' %}
-  {% assert name == 'John' %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/equal',
+    contract: contract,
+    expected: "hello",
+    given: actual_value,
+    field_name: 'greeting'
+%}
 ```
 
-#### not_equal
+#### blank
 
-Verify inequality:
+Field must be absent, null, or empty string:
 
 ```liquid
-{% test 'status changed' %}
-  {% assign status = 'active' %}
-  {% assert status != 'inactive' %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/blank',
+    contract: contract,
+    object: user,
+    field_name: 'deleted_at'
+%}
 ```
 
-#### truthy
+#### presence
 
-Check truthy condition:
+Field must exist and have a non-null value:
 
 ```liquid
-{% test 'user active' %}
-  {% assign is_active = true %}
-  {% assert is_active %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/presence',
+    contract: contract,
+    object: user,
+    field_name: 'id'
+%}
 ```
 
-#### falsy
+#### not_presence
 
-Check falsy condition:
+Field must be null or absent:
 
 ```liquid
-{% test 'no errors' %}
-  {% assign errors = blank %}
-  {% assert errors == blank %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/not_presence',
+    contract: contract,
+    object: response,
+    field_name: 'error'
+%}
 ```
 
-#### contains
+#### valid_object
 
-Check string containment:
+Object has `valid: true`:
 
 ```liquid
-{% test 'email valid' %}
-  {% assign email = 'test@example.com' %}
-  {% assert email contains '@' %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/valid_object',
+    contract: contract,
+    object: result,
+    field_name: 'user_creation'
+%}
 ```
 
-## Test Organization
+#### not_valid_object
 
-### Multiple Tests in File
+Object does not have `valid: true` (validation failed as expected):
 
 ```liquid
-{% test 'validation 1' %}
-  {% assert 1 == 1 %}
-{% endtest %}
-
-{% test 'validation 2' %}
-  {% assert 'test' == 'test' %}
-{% endtest %}
-
-{% test 'validation 3' %}
-  {% assign value = 'result'%}
-  {% assert value != blank %}
-{% endtest %}
+{% liquid
+  function contract = 'modules/tests/assertions/not_valid_object',
+    contract: contract,
+    object: result,
+    field_name: 'invalid_user_rejected'
+%}
 ```
 
-### Test File Grouping
+#### object_contains_object
 
-Organize by feature:
-
-```
-app/lib/test/
-├── user_test.liquid        # User-related tests
-├── product_test.liquid     # Product tests
-├── order_test.liquid       # Order tests
-└── payment_test.liquid     # Payment tests
-```
-
-## Test Results
-
-### Return Value Format
-
-Tests return contract compliance:
-
-```json
-{
-  "total": 45,
-  "passed": 43,
-  "failed": 2,
-  "skipped": 0,
-  "coverage": 89,
-  "failures": [
-    {
-      "test": "user validation",
-      "assertion": "user.email contains '@'",
-      "error": "assertion failed"
-    }
-  ]
-}
-```
-
-### Browser Results
-
-Visual display:
-- Green checkmark for passed
-- Red X for failed
-- Test name and description
-- Assertion that failed (if any)
-- Time taken to execute
-
-### CLI Results
-
-Console output:
-```
-Testing staging environment...
-
-✓ user validation (2ms)
-✓ email format (1ms)
-✗ password strength (3ms)
-  Assertion failed: password.length >= 8
-
-Test Results: 2 passed, 1 failed out of 3 tests
-```
-
-## Filtering and Selection
-
-### Filter by Pattern
-
-Run specific tests:
-
-```bash
-insites-cli test run staging --filter "user"
-```
-
-Runs all tests with "user" in name.
-
-### Selective Test Execution
-
-Only run tagged tests:
+Object contains a specific key-value subset:
 
 ```liquid
-{% test 'important validation' %}
-  <!-- this test runs -->
-{% endtest %}
-
-{% test 'optional check' %}
-  <!-- this test might skip -->
-{% endtest %}
+{% liquid
+  assign expected_subset = '{ "status": "success" }' | parse_json
+  function contract = 'modules/tests/assertions/object_contains_object',
+    contract: contract,
+    object: response,
+    subset: expected_subset,
+    field_name: 'response_status'
+%}
 ```
 
-## Assertions in GraphQL
+#### true / not_true
 
-### Query Results
-
-Test GraphQL query results:
+Evaluate boolean conditions:
 
 ```liquid
-{% test 'graphql user query' %}
-  {% graphql 'get_user' %}
-    query {
-      user(id: 1) {
-        id
-        name
-      }
-    }
-  {% endgraphql %}
+{% liquid
+  function contract = 'modules/tests/assertions/true',
+    contract: contract,
+    object: user,
+    field_name: 'is_admin'
 
-  {% assert 'get_user'.user.name == 'John' %}
-{% endtest %}
+  function contract = 'modules/tests/assertions/not_true',
+    contract: contract,
+    object: user,
+    field_name: 'deleted'
+%}
 ```
 
-## API Call Testing
+### Custom Error Registration
 
-### Test API Calls
-
-Verify API integration:
+When built-in assertions are insufficient:
 
 ```liquid
-{% test 'external api response' %}
-  {% api_call 'test_endpoint' %}
-    to: 'https://api.example.com'
-    format: 'json'
-    request_type: 'GET'
-  {% endapi_call %}
-
-  {% assert test_endpoint.status == 200 %}
-{% endtest %}
+{% liquid
+  assign length = value | size
+  if length < 5
+    function contract = 'modules/tests/helpers/register_error',
+      contract: contract,
+      field_name: 'string_length',
+      message: 'String must be at least 5 characters'
+  endif
+%}
 ```
 
-## Environment-Specific Testing
+### Contract Return
 
-### Development Testing
+Every test must end with:
 
-```bash
-insites-cli test run dev
+```liquid
+{% liquid
+  return contract
+%}
 ```
 
-Quick feedback for development.
+## Email Testing
 
-### Staging Testing
+### Sent Emails Endpoint
 
-```bash
-insites-cli test run staging
-```
-
-Required before production deployment.
+| Endpoint | Purpose |
+|----------|---------|
+| `/_tests/sent_mails` | Paginated list of emails sent during tests |
+| `/_tests/sent_mails/:id` | Full details of a specific email |
 
 ## See Also
 

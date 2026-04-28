@@ -47,7 +47,7 @@ Must pass with 0 errors before deployment.
 - [ ] Pages have ONE HTTP method each
 - [ ] NO raw HTML/JS/CSS in pages (pages = controllers)
 - [ ] NO GraphQL calls from partials (pages only)
-- [ ] Hardcode user-facing text directly in English (translation system is not yet configured)
+- [ ] Hardcode user-facing text directly in English
 - [ ] NO hardcoded credentials (use `context.constants`)
 - [ ] `insites-cli audit` passes
 
@@ -226,10 +226,10 @@ Need deployment?
 ├─ Deploy to environment → deployment/ (insites-cli deploy)
 ├─ Watch logs → cli/ (insites-cli logsv2)
 ├─ Run Liquid/GraphQL ad-hoc → cli/ (insites-cli exec)
-├─ Install modules → cli/ (insites-cli modules pull) (under development)
+├─ Install modules → cli/ (insites-cli modules pull)
 ├─ Set environment constants → constants/ (insites-cli constants set)
 ├─ Run migrations → migrations/
-├─ Run tests → (testing references not yet ready — do not use)
+├─ Run tests → testing/
 ├─ Lint/validate code → cli/ (insites-cli audit)
 ├─ Sync files in development → cli/ (insites-cli sync)
 └─ Environment configuration → configuration/
@@ -300,13 +300,10 @@ Use the decision trees above to identify which category applies, then load the m
 ### Modules
 | Category | Reference |
 |----------|-----------|
-| Core | `references/modules/core/` |
-| User | `references/modules/user/` |
-| Common Styling | `references/modules/common-styling/` |
-| Payments | `references/modules/payments/` |
-| Tests | `references/modules/tests/` |
-| Chat | `references/modules/chat/` |
-| OpenAI | `references/modules/openai/` |
+| CRM (insites_core) | `references/modules/crm/` |
+| Module Template | `references/modules/template/` |
+
+> Copy `references/modules/template/` to create documentation for new Insites modules. Each module gets its own directory with: README.md, api.md, configuration.md, patterns.md, gotchas.md, advanced.md.
 
 ### Configuration & Infrastructure
 | Category | Reference |
@@ -314,7 +311,6 @@ Use the decision trees above to identify which category applies, then load the m
 | Constants | `references/constants/` |
 | Configuration | `references/configuration/` |
 | Assets | `references/assets/` |
-| ~~Translations~~ | ~~`references/translations/`~~ *(not yet ready — do not use)* |
 | Sessions | `references/sessions/` |
 | Caching | `references/caching/` |
 
@@ -328,7 +324,7 @@ Use the decision trees above to identify which category applies, then load the m
 |----------|-----------|
 | CLI | `references/cli/` |
 | Deployment | `references/deployment/` |
-| ~~Testing~~ | ~~`references/testing/`~~ *(not yet ready — do not use)* |
+| Testing | `references/testing/` |
 
 ## Critical Architecture Rules
 
@@ -359,8 +355,7 @@ Validation errors are returned, not thrown
 ```
 modules/ directory is READ-ONLY — never edit files there
 Override module behavior via documented override mechanism only
-Required: core, user, common-styling
-Optional: payments, payments_stripe, tests, chat, openai
+Install modules via insites-cli modules install <name>
 ```
 → `references/modules/`
 
@@ -406,7 +401,6 @@ project-root/
 │   ├── emails/                    # Email templates
 │   ├── smses/                     # SMS templates
 │   ├── api_calls/                 # Third-party API integrations
-│   ├── translations/              # i18n content (YAML)
 │   ├── migrations/                # Data seeding and schema migrations
 │   ├── authorization_policies/    # Access control policies
 │   └── config.yml                 # Feature flags and configuration
@@ -443,7 +437,6 @@ project-root/
 - Deploying without running `insites-cli audit`
 - Syncing files outside `./app/`
 - Using Tailwind, Bootstrap, or custom CSS frameworks (use common-styling)
-- ~~Hardcoding user-facing text (use translations)~~ *(translations not yet configured — use plain English text for now)*
 - Hardcoding API keys or secrets (use `context.constants`)
 
 ## Documentation Links

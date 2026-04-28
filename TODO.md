@@ -48,13 +48,13 @@
 
 ### Priority: High
 - [ ] Rewrite `references/modules/` with actual insites module docs (module-ai, module-api, module-cms, etc.)
-- [ ] Document undocumented CLI commands: `archive`, `duplicate`, `pull`, `modules init`, `modules version`, `migrations run`
+- [x] Document undocumented CLI commands: `archive`, `duplicate`, `pull`, `modules init`, `modules version`, `migrations run`
 - [ ] Update `platformos-language-server` links in plugin READMEs
 
 ### Priority: Medium
-- [ ] Re-enable testing references once `insites-cli test run` is available
-- [ ] Re-enable translations references once translation workflow is finalized
-- [ ] Rename `.platformos-check.yml` → `.insites-check.yml` in docs/examples
+- [x] Re-enable testing references once `insites-cli test run` is available (done in v5.9.2)
+- [x] Remove translations module placeholder (removed — hardcode English for now)
+- [x] Rename `.platformos-check.yml` → `.insites-check.yml` in docs/examples (verified: no references remain)
 - [ ] Document `insites-cli modules install` when it becomes available
 
 ### Priority: Low
@@ -64,7 +64,7 @@
 - [ ] `"platformos"` as a schema tag example value in `references/schema/patterns.md`
 
 ### CLI Team Backlog (commands to implement)
-- [ ] `insites-cli test run <environment>`
+- [x] `insites-cli test run <environment>` (released in v5.9.2)
 - [ ] `insites-cli constants set/list`
 - [ ] `insites-cli translations import/export/list/validate/languages`
 - [ ] `insites-cli assets upload/list/remove`

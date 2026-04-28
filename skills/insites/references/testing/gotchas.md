@@ -1,332 +1,133 @@
 # Testing Gotchas and Troubleshooting
 
-## Environment Restrictions
+## Contract Not Initialized
 
-### Test Only on Dev and Staging
+**Symptom:** Test runs but no assertions execute; test appears to pass but validates nothing.
 
-**Issue**: Cannot run tests on production
+**Fix:** Add `function contract = 'modules/tests/helpers/init'` as the first line:
 
-```bash
-# WRONG - This fails
-insites-cli test run production
+```liquid
+{% liquid
+  function contract = 'modules/tests/helpers/init'
+  # ... rest of test ...
+  return contract
+%}
 ```
 
-**Why**: Tests require isolated test data and should never affect live systems.
+## Contract Not Returned
 
-### Correct Environments
+**Symptom:** Test appears to pass but results aren't collected.
 
-```bash
-# CORRECT - Development
-insites-cli test run dev
+**Fix:** Add `return contract` as the last statement in the test file.
 
-# CORRECT - Staging
-insites-cli test run staging
+## Contract Not Reassigned
+
+**Symptom:** Error about nil contract, or only the last assertion is recorded.
+
+```liquid
+{% liquid
+  # WRONG — contract not updated
+  function result = 'modules/tests/assertions/equal', contract: contract, expected: "a", given: "a", field_name: 'test'
+
+  # CORRECT — contract reassigned
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: "a", given: "a", field_name: 'test'
+%}
 ```
 
-## Test File Organization Issues
+## Test File Not Found
 
-### Test File Not Found
+**Symptom:** `insites-cli test run` finds no tests.
 
-**Issue**: `insites-cli test run` finds no tests
-
-**Causes**:
+**Causes:**
 - File not in `app/lib/test/` directory
-- Wrong file naming (must end with `_test.liquid`)
-- File not saved or syntax error
+- File doesn't end with `_test.liquid`
+- File not deployed
 
-**Solution**:
+**Fix:**
 ```bash
-# Verify file location
-ls -la app/lib/test/
+# Verify file exists
+ls app/lib/test/
 
-# Check naming convention
-# Correct: user_test.liquid
-# Wrong: user_tests.liquid or usertest.liquid
+# Naming must be: *_test.liquid
+# WRONG: user_tests.liquid, test_user.liquid
+# CORRECT: user_test.liquid
+
+# Always deploy before running tests
+insites-cli deploy staging
 ```
 
-### Wrong Directory Structure
+## Tests Not Running in Production
 
-**Issue**: Tests not discovered
+**This is by design.** Tests can only run on development and staging environments.
 
-**Correct Structure**:
-```
-app/
-└── lib/
-    └── test/
-        ├── user_test.liquid
-        ├── product_test.liquid
-        └── order_test.liquid
-```
-
-## Assertion Issues
-
-### Assertion Syntax Error
-
-**Issue**: Test fails with "Invalid assertion"
-
-```liquid
-# WRONG
-{% assert user %}        # Missing comparison
-
-# CORRECT
-{% assert user != blank %}
-{% assert user == 'John' %}
-```
-
-### Unknown Assertion Type
-
-**Issue**: "Unknown assertion method"
-
-**Valid Assertions**:
-- `valid_object`
-- `==` (equal)
-- `!=` (not_equal)
-- Truthy (blank check)
-- `contains`
-
-```liquid
-# WRONG
-{% assert user.email is_valid %}
-
-# CORRECT
-{% assert user.email contains '@' %}
-```
-
-### Type Mismatch in Assertions
-
-**Issue**: Comparing incompatible types
-
-```liquid
-# WRONG
-{% assign count = '10' %}
-{% assert count == 10 %}  # String vs number
-
-# CORRECT
-{% assign count = 10 | to_s %}
-{% assert count == '10' %}
-```
-
-## Data and Context Issues
-
-### Current User Not Available
-
-**Issue**: `context.current_user` is nil in tests
-
-**Reason**: Tests run in isolation without user session
-
-**Solution**:
-```liquid
-{% test 'user properties' %}
-  {% assign test_user = 'John' %}
-  {% assert test_user != blank %}
-{% endtest %}
-```
-
-### Graphql Variable Issues
-
-**Issue**: GraphQL query variables undefined
-
-```liquid
-# WRONG
-{% graphql 'get_user' %}
-  query {
-    user(id: $id) {  <!-- $id undefined -->
-      name
-    }
-  }
-{% endgraphql %}
-
-# CORRECT
-{% graphql 'get_user' %}
-  query GetUser($id: ID!) {
-    user(id: $id) {
-      name
-    }
-  }
-{% endgraphql %}
-```
-
-### API Call in Tests
-
-**Issue**: API call times out or fails
-
-**Solution**:
-```liquid
-{% test 'api availability' %}
-  {% api_call 'health_check' %}
-    to: 'https://api.example.com/health'
-    format: 'json'
-    request_type: 'GET'
-  {% endapi_call %}
-
-  {% if health_check.status == 200 %}
-    {% assert true %}
-  {% else %}
-    {% assert false %}
-  {% endif %}
-{% endtest %}
-```
-
-## Performance and Timeout Issues
-
-### Test Execution Timeout
-
-**Issue**: Test runs forever or times out
-
-**Common Causes**:
-- Infinite loop in test
-- API call hanging
-- Large data processing
-
-**Solution**:
-```liquid
-# Add timeout guard
-{% assign timeout_count = 0 %}
-
-{% for i in (1..10000) %}
-  {% assign timeout_count = timeout_count | plus: 1 %}
-  {% if timeout_count > 1000 %}
-    {% break %}
-  {% endif %}
-{% endfor %}
-
-{% assert timeout_count <= 1000 %}
-```
-
-### Slow Tests
-
-**Issue**: Test execution takes too long
-
-**Optimization**:
-- Minimize data processing
-- Avoid large loops
-- Use realistic dataset sizes
-
-```liquid
-# Inefficient
-{% for i in (1..100000) %}
-  <!-- slow operation -->
-{% endfor %}
-
-# Better
-{% for i in (1..100) %}
-  <!-- fast operation -->
-{% endfor %}
-```
-
-## Variable Scope Issues
-
-### Variables Not Persisting Between Assertions
-
-**Issue**: Variable value changes between assertions
-
-```liquid
-{% test 'variable scope' %}
-  {% assign value = 10 %}
-  {% assert value == 10 %}
-
-  {% assign value = 20 %}  <!-- Reassignment -->
-  {% assert value == 20 %}
-{% endtest %}
-```
-
-### Filter Application
-
-**Issue**: Filters not working as expected
-
-```liquid
-# WRONG
-{% assign price = 100 %}
-{% assert price * 0.1 == 10 %}  <!-- * not valid in liquid -->
-
-# CORRECT
-{% assign price = 100 %}
-{% assign discount = price | times: 0.1 %}
-{% assert discount == 10 %}
-```
-
-## Test Result Issues
-
-### Tests Pass Locally but Fail in CI
-
-**Issue**: Environment-dependent tests
-
-**Causes**:
-- Different Insites version
-- Missing constants in CI environment
-- Different data state
-
-**Solution**:
 ```bash
-# Test on staging first
+# WRONG
+insites-cli test run production
+
+# CORRECT
 insites-cli test run staging
-
-# Then CI environment
 ```
 
-### False Positive Tests
+## Object Property Access on Nil
 
-**Issue**: Tests pass but functionality broken
+**Symptom:** Cannot access property of nil.
 
-**Solution**:
+**Fix:** Check the object exists before asserting on its properties:
+
 ```liquid
-# Better assertions
-{% test 'user email' %}
-  {% assign user = context.current_user %}
-
-  <!-- More comprehensive -->
-  {% assert user valid_object %}
-  {% assert user.email != blank %}
-  {% assert user.email contains '@' %}
-  {% assert user.email | size > 5 %}
-{% endtest %}
+{% liquid
+  if user != blank
+    function contract = 'modules/tests/assertions/equal', contract: contract, expected: "test@example.com", given: user.email, field_name: 'user.email'
+  else
+    function contract = 'modules/tests/helpers/register_error', contract: contract, field_name: 'user_exists', message: 'User object is nil'
+  endif
+%}
 ```
 
-## Contract Compliance Issues
+## Stale Test Results
 
-### Contract Not Returned
+**Symptom:** Tests pass but code changes aren't reflected.
 
-**Issue**: `insites-cli test run` doesn't show contract
+**Fix:** Always deploy before running tests:
 
-**Solution**:
-- Ensure all assertions are valid
-- Check test file syntax
-- Run with verbose flag: `insites-cli test run staging --verbose`
-
-### Coverage Metrics Missing
-
-**Issue**: Contract doesn't include coverage percentage
-
-**Note**: Coverage depends on how extensively tests validate code paths.
-
-## Common Test Failures
-
-### Email Validation Fails
-
-**Issue**: Email format assertion fails
-
-```liquid
-# WRONG - Only checks presence
-{% assign email = 'test' %}
-{% assert email != blank %}
-
-# CORRECT - Validates format
-{% assign email = 'test@example.com' %}
-{% assert email contains '@' %}
+```bash
+insites-cli deploy staging
+insites-cli test run staging
 ```
 
-### Number Comparison Fails
+Or use sync mode for active development:
 
-**Issue**: String vs number comparison
+```bash
+# Terminal 1
+insites-cli sync staging
 
-```liquid
-# WRONG
-{% assign count = '5' %}
-{% assert count == 5 %}
+# Terminal 2
+insites-cli test run staging -n test/your_test
+```
 
-# CORRECT - Convert to same type
-{% assign count = 5 | to_s %}
-{% assert count == '5' %}
+## Tests Pass Locally but Fail in CI
+
+**Causes:**
+- Missing constants in CI environment
+- Different data state between environments
+- Tests not deployed
+
+**Fix:**
+- Ensure constants are set on the CI environment
+- Make tests self-contained (create their own test data)
+- Deploy before running tests in CI
+
+## Wrong Test Directory
+
+```
+# WRONG paths
+app/lib/tests/          (extra 's')
+app/tests/
+tests/
+app/lib/test.liquid     (not a directory)
+
+# CORRECT path
+app/lib/test/
 ```
 
 ## See Also

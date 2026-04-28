@@ -185,4 +185,4 @@ Access page front matter metadata via `context.page.metadata`:
 - [Layouts API](api.md) -- tags and objects available in layouts
 - [Pages Configuration](../pages/configuration.md) -- how pages select layouts
 - [Flash Messages](../flash-messages/README.md) -- toast notification details
-- [Common Styling](../modules/common-styling/README.md) -- CSS framework setup
+- [Modules](../modules/template/README.md) -- module reference template

@@ -1,5 +1,19 @@
 # CLI Commands Reference
 
+## Archive Command
+
+Create a deployment archive without deploying:
+
+```bash
+insites-cli archive
+insites-cli archive -o ./tmp/release.zip
+```
+
+Options:
+- `-o, --output <output>` — Archive filename (default: `./tmp/release.zip`)
+
+Useful for CI/CD pipelines where you need to build an artifact without deploying.
+
 ## Deploy Command
 
 Deploy your application to an environment:
@@ -71,24 +85,48 @@ insites-cli exec dev liquid "{{ 'Hello' }}"
 insites-cli exec dev graphql "{ users { id name } }"
 ```
 
-## Modules Management
+## Duplicate Command
 
-### Install Module
-
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually.
-
-Pull an existing module from an instance:
+Duplicate one environment into another:
 
 ```bash
-insites-cli modules pull @platform-os/blog dev
+insites-cli duplicate init <sourceEnv> <targetEnv>
+insites-cli duplicate init staging dev
 ```
 
-### Download Module
+Copies the source environment (code, data, configuration) into the target.
 
-Download module code locally:
+## Pull Command
+
+Export app data from an environment to a zip file:
 
 ```bash
-insites-cli modules download @platform-os/blog ./modules
+insites-cli pull [environment]
+insites-cli pull staging
+insites-cli pull staging -p ./backup.zip
+```
+
+Options:
+- `-p, --path <export-file-path>` — Output file path (default: `app.zip`)
+
+## Modules Management
+
+### Initialize Module
+
+Scaffold a new module with the starter structure:
+
+```bash
+insites-cli modules init <name>
+insites-cli modules init my-module
+```
+
+### Pull Module
+
+Pull a module from an instance:
+
+```bash
+insites-cli modules pull [environment] <name>
+insites-cli modules pull staging @platform-os/blog
 ```
 
 ### List Modules
@@ -96,8 +134,25 @@ insites-cli modules download @platform-os/blog ./modules
 View installed modules:
 
 ```bash
-insites-cli modules list
-insites-cli modules list dev
+insites-cli modules list [environment]
+insites-cli modules list staging
+```
+
+### Remove Module
+
+Remove a module from an instance (removes configuration and data):
+
+```bash
+insites-cli modules remove [environment] <name>
+insites-cli modules remove staging @platform-os/blog
+```
+
+### Version Module
+
+Create a new version of a module:
+
+```bash
+insites-cli modules version [version] --package
 ```
 
 ## Constants Management
@@ -131,13 +186,13 @@ insites-cli migrations generate [environment] [migration_name]
 insites-cli migrations generate dev create_users_table
 ```
 
-### Run Migrations
+### Run Migration
 
-Execute pending migrations:
+Execute a specific migration by timestamp:
 
 ```bash
-insites-cli migrations run [environment]
-insites-cli migrations run staging
+insites-cli migrations run <timestamp> [environment]
+insites-cli migrations run 20240101120000 staging
 ```
 
 ### List Migrations
@@ -185,10 +240,13 @@ Run automated tests:
 ```bash
 insites-cli test run [environment]
 insites-cli test run staging
-insites-cli test run dev --verbose
+insites-cli test run staging -n [test-name]
+insites-cli test run staging -n test/commands/users/create_test
 ```
 
-Returns contract compliance results.
+Exit codes:
+- `0` = All tests passed
+- Non-zero = Test failures occurred
 
 ## See Also
 

@@ -2,204 +2,155 @@
 
 ## Basic Test Pattern
 
-### Simple Validation Test
+### Simple Command Test
 
 ```liquid
-{% test 'user email validation' %}
-  {% assign email = 'user@example.com' %}
-  {% assert email contains '@' %}
-{% endtest %}
+{% comment %} app/lib/test/commands/contacts/create_test.liquid {% endcomment %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
+
+  assign data = '{ "email": "user@example.com", "body": "Hello" }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: contact, field_name: 'contact'
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: "user@example.com", given: contact.email, field_name: 'contact.email'
+
+  return contract
+%}
 ```
 
-## Unit Testing Pattern
+## Validation Failure Pattern
 
-### Testing Business Logic
+### Testing Invalid Input
 
 ```liquid
-{% test 'calculate discount' %}
-  {% assign price = 100 %}
-  {% assign discount_rate = 0.1 %}
-  {% assign discount = price | times: discount_rate %}
+{% comment %} app/lib/test/commands/contacts/create_invalid_test.liquid {% endcomment %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% assert discount == 10 %}
-{% endtest %}
+  assign data = '{ "email": "invalid-email", "body": "" }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  function contract = 'modules/tests/assertions/not_valid_object', contract: contract, object: contact, field_name: 'invalid_contact'
+  function contract = 'modules/tests/assertions/presence', contract: contract, object: contact.errors, field_name: 'email'
+
+  return contract
+%}
 ```
 
-### Testing String Manipulation
+## Multi-Assertion Pattern
+
+### Comprehensive Object Validation
 
 ```liquid
-{% test 'format phone number' %}
-  {% assign phone = '1234567890' %}
-  {% assign formatted = phone | slice: 0, 3 | append: '-' | append: phone | slice: 3, 3 | append: '-' | append: phone | slice: 6, 4 %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% assert formatted == '123-456-7890' %}
-{% endtest %}
+  assign data = '{ "email": "USER@example.com", "body": "This is a valid message." }' | parse_json
+  function contact = 'commands/contacts/create', object: data
+
+  # 1. Should be valid
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: contact, field_name: 'contact'
+
+  # 2. Email should be downcased
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: 'user@example.com', given: contact.email, field_name: 'contact.email'
+
+  # 3. Body should match
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: 'This is a valid message.', given: contact.body, field_name: 'contact.body'
+
+  # 4. Errors should be blank
+  function contract = 'modules/tests/assertions/blank', contract: contract, object: contact, field_name: 'errors'
+
+  return contract
+%}
 ```
 
-## Integration Testing Pattern
+## Query Test Pattern
 
 ### Testing Data Retrieval
 
 ```liquid
-{% test 'fetch user data' %}
-  {% graphql 'fetch_user' %}
-    query GetUser($id: ID!) {
-      user(id: $id) {
-        id
-        name
-        email
-      }
-    }
-  {% endgraphql %}
+{% comment %} app/lib/test/queries/users/find_test.liquid {% endcomment %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% assert fetch_user.user valid_object %}
-  {% assert fetch_user.user.email contains '@' %}
-{% endtest %}
+  # Create a user to query
+  assign user_data = '{ "email": "query-test@example.com", "name": "Query Test" }' | parse_json
+  function created = 'commands/users/create', object: user_data
+
+  # Query the user
+  function found = 'lib/queries/users/find', id: created.id
+
+  function contract = 'modules/tests/assertions/presence', contract: contract, object: found, field_name: 'id'
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: "query-test@example.com", given: found.email, field_name: 'found.email'
+
+  return contract
+%}
 ```
 
-## API Call Testing Pattern
+## Helper/Utility Test Pattern
 
-### External Service Integration
+### Testing Pure Functions
 
 ```liquid
-{% test 'payment gateway integration' %}
-  {% api_call 'payment_check' %}
-    to: 'https://api.payment.com/status'
-    format: 'json'
-    request_type: 'GET'
-    request_headers: '{ "Authorization": "Bearer token" }'
-  {% endapi_call %}
+{% comment %} app/lib/test/helpers/format_price_test.liquid {% endcomment %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% assert payment_check.status == 200 %}
-  {% assert payment_check.response.success %}
-{% endtest %}
+  # Normal price
+  function result = 'lib/helpers/format_price', amount: 1999
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: "$19.99", given: result, field_name: 'normal_price'
+
+  # Zero price
+  function result = 'lib/helpers/format_price', amount: 0
+  function contract = 'modules/tests/assertions/equal', contract: contract, expected: "$0.00", given: result, field_name: 'zero_price'
+
+  return contract
+%}
 ```
 
-## Error Handling Testing Pattern
+## Authorization Test Pattern
 
-### Negative Test Cases
+### Testing Permission Logic
 
 ```liquid
-{% test 'invalid email rejected' %}
-  {% assign invalid_email = 'not-an-email' %}
+{% comment %} app/lib/test/authorization/can_edit_test.liquid {% endcomment %}
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-  {% if invalid_email contains '@' %}
-    {% assign valid = true %}
-  {% else %}
-    {% assign valid = false %}
-  {% endif %}
+  # Admin can edit
+  function can_edit = 'lib/authorization/can_edit', role: 'admin'
+  function contract = 'modules/tests/assertions/true', contract: contract, object: can_edit, field_name: 'result'
 
-  {% assert valid == false %}
-{% endtest %}
+  # Guest cannot edit
+  function can_edit = 'lib/authorization/can_edit', role: 'guest'
+  function contract = 'modules/tests/assertions/not_true', contract: contract, object: can_edit, field_name: 'result'
+
+  return contract
+%}
 ```
 
-### Exception Testing
-
-```liquid
-{% test 'division by zero handling' %}
-  {% assign numerator = 10 %}
-  {% assign denominator = 0 %}
-
-  {% if denominator == 0 %}
-    {% assign result = 'error' %}
-  {% else %}
-    {% assign result = numerator | divided_by: denominator %}
-  {% endif %}
-
-  {% assert result == 'error' %}
-{% endtest %}
-```
-
-## Data Validation Pattern
-
-### Schema Validation
-
-```liquid
-{% test 'user object structure' %}
-  {% assign user = context.current_user %}
-
-  {% assert user valid_object %}
-  {% assert user.id != blank %}
-  {% assert user.email contains '@' %}
-  {% assert user.created_at != blank %}
-{% endtest %}
-```
-
-### Type Checking
-
-```liquid
-{% test 'price is numeric' %}
-  {% assign price = '19.99' | to_number %}
-
-  {% assert price == 19.99 %}
-{% endtest %}
-```
-
-## Comprehensive Test Suite Pattern
-
-### Testing File Example
-
-```liquid
----
-# Header with metadata (optional)
----
-
-<!-- User Model Tests -->
-{% test 'user creation' %}
-  {% assign user_name = 'John Doe' %}
-  {% assert user_name != blank %}
-{% endtest %}
-
-{% test 'user email validation' %}
-  {% assign email = 'john@example.com' %}
-  {% assert email contains '@' %}
-{% endtest %}
-
-<!-- Product Tests -->
-{% test 'product price validation' %}
-  {% assign price = 29.99 %}
-  {% assert price > 0 %}
-{% endtest %}
-
-{% test 'product inventory check' %}
-  {% assign inventory = 10 %}
-  {% assert inventory >= 0 %}
-{% endtest %}
-
-<!-- Order Tests -->
-{% test 'order total calculation' %}
-  {% assign item_price = 50 %}
-  {% assign quantity = 2 %}
-  {% assign total = item_price | times: quantity %}
-
-  {% assert total == 100 %}
-{% endtest %}
-```
-
-## Continuous Testing Pattern
+## CI/CD Pattern
 
 ### Pre-Deployment Testing Workflow
 
 ```bash
-# 1. Development testing
-insites-cli test run dev
+# 1. Deploy to staging
+insites-cli deploy staging
 
-# 2. Staging testing (comprehensive)
-insites-cli test run staging --verbose
+# 2. Run all tests
+insites-cli test run staging
 
-# 3. Review results
-insites-cli logs staging --filter test
-
-# 4. If all pass, deploy
+# 3. If all pass, deploy to production
 insites-cli deploy production
 ```
 
-### Automated Testing in CI/CD
+### GitHub Actions
 
 ```yaml
-# GitHub Actions
 - name: Run Tests
   run: |
+    insites-cli deploy staging
     insites-cli test run staging
     if [ $? -ne 0 ]; then
       echo "Tests failed"
@@ -207,41 +158,17 @@ insites-cli deploy production
     fi
 ```
 
-## Performance Testing Pattern
+## Real-Time Development Pattern
 
-### Load Simulation
+```bash
+# Terminal 1: Start sync
+insites-cli sync staging
 
-```liquid
-{% test 'handle bulk operations' %}
-  {% assign items = '' %}
+# Terminal 2: Watch logs
+insites-cli logsv2 staging
 
-  {% for i in (1..1000) %}
-    {% assign items = items | append: i | append: ',' %}
-  {% endfor %}
-
-  {% assign item_count = items | split: ',' | size %}
-  {% assert item_count == 1000 %}
-{% endtest %}
-```
-
-## Contract Testing Pattern
-
-### Expected Response Structure
-
-```liquid
-{% test 'api contract compliance' %}
-  {% api_call 'user_service' %}
-    to: 'https://api.example.com/users/1'
-    format: 'json'
-    request_type: 'GET'
-  {% endapi_call %}
-
-  <!-- Verify contract -->
-  {% assert user_service.response.user valid_object %}
-  {% assert user_service.response.user.id != blank %}
-  {% assert user_service.response.user.name != blank %}
-  {% assert user_service.response.user.email != blank %}
-{% endtest %}
+# Terminal 3: Run tests as needed
+insites-cli test run staging -n test/commands/contacts/create_test
 ```
 
 ## See Also

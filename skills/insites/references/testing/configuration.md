@@ -1,124 +1,84 @@
 # Testing Configuration Reference
 
-## Test Setup
+## Prerequisites
 
-Insites uses the platform's built-in automated testing framework.
+### 1. Install the Tests Module
+
+```bash
+insites-cli modules install tests
+insites-cli deploy staging
+```
+
+### 2. Verify Installation
+
+```bash
+insites-cli modules list staging
+```
+
+The `test` module should appear in the list.
 
 ## Test File Location and Structure
 
 ### Test Directory
 
-Create tests in `app/lib/test/` directory:
+All tests go in `app/lib/test/`:
 
 ```
 app/lib/test/
-├── user_test.liquid
-├── product_test.liquid
-├── helper_test.liquid
-└── api_test.liquid
+├── commands/
+│   ├── users/
+│   │   ├── create_test.liquid
+│   │   └── update_test.liquid
+│   └── products/
+│       └── create_test.liquid
+├── queries/
+│   └── users/
+│       └── find_test.liquid
+└── helpers/
+    └── format_price_test.liquid
 ```
 
 ### Test File Naming
 
-Follow naming convention: `*_test.liquid`
+Files **must** end with `_test.liquid`:
 
 ```bash
-# Valid test files
-user_test.liquid
-api_calls_test.liquid
-helpers_test.liquid
-custom_logic_test.liquid
+# Valid
+create_test.liquid
+user_login_test.liquid
+
+# Invalid — will not be discovered
+create_tests.liquid
+test_create.liquid
+create.liquid
 ```
 
-### Test File Structure
+### Module Tests
+
+When building a module, place tests in the private directory:
+
+```
+modules/<module_name>/private/lib/test/
+```
+
+## Test File Structure
+
+Every test file follows the contract pattern:
 
 ```liquid
----
-# Front matter (optional)
----
+{% liquid
+  function contract = 'modules/tests/helpers/init'
 
-<!-- Test case 1 -->
-{% test 'user validation' %}
-  {% assign user = 'John' %}
-  {% assert user != blank %}
-{% endtest %}
+  # Setup: create test data
+  assign data = '{ "email": "test@example.com" }' | parse_json
+  function result = 'commands/users/create', object: data
 
-<!-- Test case 2 -->
-{% test 'email format' %}
-  {% assign email = 'test@example.com' %}
-  {% assert email contains '@' %}
-{% endtest %}
-```
+  # Assert: verify results
+  function contract = 'modules/tests/assertions/valid_object', contract: contract, object: result, field_name: 'user'
 
-## Assertions Available
-
-### valid_object
-
-Check if object exists and is valid:
-
-```liquid
-{% assert context.current_user valid_object %}
-```
-
-### equal
-
-Compare for equality:
-
-```liquid
-{% assert user.name == 'John' %}
-```
-
-### not_equal
-
-Check inequality:
-
-```liquid
-{% assert user.status != 'inactive' %}
-```
-
-### truthy
-
-Check truthy values:
-
-```liquid
-{% assert user.is_active %}
-```
-
-### falsy
-
-Check falsy values:
-
-```liquid
-{% assert user.deleted_at == blank %}
-```
-
-### contains
-
-Check string containment:
-
-```liquid
-{% assert email contains '@' %}
-```
-
-## Test Execution Methods
-
-### Browser Testing
-
-Run tests in browser at test endpoint:
-
-```
-http://localhost:3000/_tests/run
-```
-
-Tests execute and display results interactively.
-
-### CLI Testing
-
-Run tests via command line:
-
-```bash
-insites-cli test run staging
-insites-cli test run dev --verbose
+  # Return contract (mandatory)
+  return contract
+%}
 ```
 
 ## Test Environments
@@ -129,109 +89,35 @@ Tests can only run on:
 - Development (`dev`)
 - Staging (`staging`)
 
-### Why Not Production
+**Never run tests in production.** The test runner only operates on staging/development environments.
 
-- Tests are for validation only
-- Production should never run tests
-- Testing requires test data isolation
+## Running Tests
 
-## Test Output and Results
-
-### Contract Compliance
-
-Tests return contract compliance results:
-
-```json
-{
-  "passed": 45,
-  "failed": 2,
-  "skipped": 0,
-  "coverage": 92
-}
-```
-
-### Test Report Structure
-
-- Test name
-- Assertion details
-- Pass/fail status
-- Execution time
-
-### Verbose Output
-
-Get detailed information:
+### Deploy First (Required)
 
 ```bash
-insites-cli test run staging --verbose
+insites-cli deploy staging
 ```
 
-Shows:
-- Each assertion result
-- Stack traces on failure
-- Performance metrics
-- Coverage information
+### Run All Tests
 
-## Test Configuration File
-
-### pos-test.yml (Optional)
-
-Configure test behavior:
-
-```yaml
-test:
-  environment: staging
-  timeout: 30000
-  verbose: true
-  include_patterns:
-    - '**/*_test.liquid'
-  exclude_patterns:
-    - '**/skip_*'
+```bash
+insites-cli test run staging
 ```
 
-## Assertions in Detail
+### Run Specific Test
 
-### Basic Pattern
-
-```liquid
-{% test 'test description' %}
-  {% assign value = 'result' %}
-  {% assert value == 'expected' %}
-{% endtest %}
+```bash
+insites-cli test run staging -n test/commands/users/create_test
 ```
 
-### Multiple Assertions
+### Browser Access
 
-```liquid
-{% test 'complex validation' %}
-  {% assign user = context.current_user %}
-  {% assert user valid_object %}
-  {% assert user.email contains '@' %}
-  {% assert user.status != blank %}
-{% endtest %}
-```
-
-## Test Isolation
-
-### Data Cleanup
-
-Tests should be isolated:
-
-```liquid
-{% test 'create user' %}
-  <!-- Create test user -->
-  {% assign user = 'test_user' %}
-  <!-- Cleanup after test -->
-  {% assign user = blank %}
-{% endtest %}
-```
-
-### Environment Variables
-
-Use test-specific constants:
-
-```liquid
-{% assign test_api_key = context.constants.TEST_API_KEY %}
-```
+| Endpoint | Purpose |
+|----------|---------|
+| `/_tests` | List all test files |
+| `/_tests/run` | Run all tests (HTML) |
+| `/_tests/run.js` | Run all tests (JSON) |
 
 ## See Also
 

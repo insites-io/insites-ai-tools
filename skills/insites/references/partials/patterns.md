@@ -278,4 +278,3 @@ authorization_policies:
 - [api.md](api.md) — tag reference
 - [gotchas.md](gotchas.md) — common errors
 - [Commands](../commands/README.md) — command partial pattern
-- [Translations](../translations/README.md) — i18n for partial text
