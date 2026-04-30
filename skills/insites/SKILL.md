@@ -89,7 +89,33 @@ Need data operations?
 ├─ Upload files → schema/ (upload type) + forms/
 ├─ Seed/migrate data → migrations/
 ├─ Bulk import/export → migrations/ or insites-cli data commands
-└─ Access existing Postgres/ES/Redis → graphql/ (all DB access via GraphQL only)
+├─ Access existing Postgres/ES/Redis → graphql/ (all DB access via GraphQL only)
+└─ Contacts / companies / tasks / activities → modules/crm/ (V2 REST API; see "I need CRM data" tree below)
+```
+
+### "I need CRM data (contacts, companies, tasks, activities, attachments)"
+
+```
+Need CRM operations?
+├─ Start here (overview, audience routing)         → modules/crm/README.md
+├─ Look up V2 REST endpoints, conventions, errors  → modules/crm/api.md
+├─ Worked HTTP examples for common flows           → modules/crm/patterns.md
+├─ API edges and quirks (no Bearer prefix, etc.)   → modules/crm/gotchas.md
+├─ Configure custom fields / system fields / webhooks in IIA → modules/crm/configuration.md
+├─ Override email layouts, hook into webhooks      → modules/crm/advanced.md
+│
+├─ Contacts (CRUD + addresses + personal info + profiles + relationships) → modules/crm/api.md (Contacts)
+├─ Companies (CRUD + addresses + info + relationships + assign-contacts)  → modules/crm/api.md (Companies)
+├─ Custom fields (definitions in IIA, values via API)                     → modules/crm/configuration.md + api.md (Custom fields)
+├─ System fields (contact type, lead source, industry, etc.)              → modules/crm/api.md (System fields) + configuration.md
+│
+├─ Tasks (CRUD + complete/open lifecycle) + task comments                 → modules/crm/globals/tasks.md
+├─ Activities (calls, meetings, notes — attached to a feature)            → modules/crm/globals/activities.md
+├─ File attachments (two-step S3 direct-upload flow)                      → modules/crm/globals/attachments.md
+├─ Event streams (audit / activity feed, append-only)                     → modules/crm/globals/event_streams.md
+│
+├─ Auth (instance API key, no Bearer prefix)                              → references/api/authentication.md
+└─ Pipelines / stages / opportunities / cases — NOT in v2 API (legacy v1 archived)
 ```
 
 ### "I need business logic"
