@@ -1,0 +1,25 @@
+{
+  "id": "module-detection-crm",
+  "module": "crm",
+  "label": "CRM",
+  "when": {
+    "any": [
+      {
+        "signal": "has_contact_form"
+      },
+      {
+        "signal": "has_account_signup"
+      },
+      {
+        "signal": "has_member_login"
+      },
+      {
+        "signal": "import_customer_data"
+      }
+    ]
+  },
+  "rationale": "Form submissions wire automatically to matching contact records; sign-in flow needs user records.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

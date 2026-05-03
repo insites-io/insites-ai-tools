@@ -1,0 +1,224 @@
+{
+  "$schema": "../engine/schemas/rule-index.schema.json",
+  "version": "0.1.0-draft",
+  "generated": "2026-05-01",
+  "status": "draft - awaiting team review of audit resolutions",
+  "rules": [
+    {
+      "id": "partials-no-underscore-prefix",
+      "file": "partials.md",
+      "applies_to": ["partial"],
+      "severity": "error",
+      "evidence": "real-project",
+      "evidence_source": "100% compliance across 438 partials in app-portal, app-seedling, addon-ecommerce, addon-events. Pending cli-audit verification to upgrade evidence.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-3"
+    },
+    {
+      "id": "pages-one-http-method",
+      "file": "pages.md",
+      "applies_to": ["page"],
+      "severity": "info",
+      "evidence": "real-project",
+      "evidence_source": "100% compliance observed across 30+ pages in all four repos. Each page declares exactly one method: in front matter.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-13"
+    },
+    {
+      "id": "render-vs-function-tags",
+      "file": "partials.md",
+      "applies_to": ["partial", "page"],
+      "severity": "info",
+      "evidence": "real-project",
+      "evidence_source": "Convention followed where used. render produces HTML; function returns data.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-14"
+    },
+    {
+      "id": "graphql-tables-fully-qualified",
+      "file": "graphql.md",
+      "applies_to": ["graphql"],
+      "severity": "info",
+      "evidence": "real-project",
+      "evidence_source": "100% compliance across 20+ GraphQL files. All tables use modules/{name}/... format.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-15"
+    },
+    {
+      "id": "schema-property-functions",
+      "file": "schema.md",
+      "applies_to": ["graphql"],
+      "severity": "error",
+      "evidence": "real-project",
+      "evidence_source": "100% compliance across 30+ GraphQL files. property(), property_int(), property_boolean() etc. used universally.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-25"
+    },
+    {
+      "id": "csrf-token-required",
+      "file": "forms.md",
+      "applies_to": ["form", "page"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "All POST forms found include authenticity_token. Global meta-tag pattern covers other cases.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-6"
+    },
+    {
+      "id": "commands-return-valid-errors",
+      "file": "commands.md",
+      "applies_to": ["command"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "100% compliance in the limited sample of 2 command files (app-seedling 2fa_functions). Pattern correct, sample small.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-9"
+    },
+    {
+      "id": "commands-args-object-syntax",
+      "file": "commands.md",
+      "applies_to": ["command", "page"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "Consistent usage of args: object syntax in graphql tags across the corpus.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-22"
+    },
+    {
+      "id": "auth-policies-in-front-matter",
+      "file": "authorization.md",
+      "applies_to": ["page", "policy"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "27+ files declare authorization_policies: in front matter. Pattern universal.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-24"
+    },
+    {
+      "id": "auth-policy-explicit-true-false",
+      "file": "authorization.md",
+      "applies_to": ["policy"],
+      "severity": "error",
+      "evidence": "real-project",
+      "evidence_source": "6 of 7 policies compliant. 1 violation in addon-ecommerce/.../order_created_date_valid.liquid (potential auth bypass).",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-7",
+      "preship_action": "Fix addon-ecommerce/modules/ecommerce/public/authorization_policies/order_created_date_valid.liquid before shipping."
+    },
+    {
+      "id": "auth-policies-handle-nil",
+      "file": "authorization.md",
+      "applies_to": ["policy"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "Most policies defensively handle nil. 1 violation in addon-ecommerce.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-12"
+    },
+    {
+      "id": "use-related-record-for-joins",
+      "file": "graphql.md",
+      "applies_to": ["graphql"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "20+ files use related_record() / related_records() correctly. Property arrays used for filtering only.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-21"
+    },
+    {
+      "id": "liquid-blocks-line-wrapping",
+      "file": "liquid-syntax.md",
+      "applies_to": ["page", "partial", "command", "policy"],
+      "severity": "info",
+      "evidence": "skill-only",
+      "evidence_source": "All 81 liquid blocks comply. No violations found, but no enforcement either.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-19"
+    },
+    {
+      "id": "use-context-constants-for-secrets",
+      "file": "modules.md",
+      "applies_to": ["page", "partial", "command", "graphql"],
+      "severity": "error",
+      "evidence": "runtime-failure",
+      "evidence_source": "Most code uses context.constants correctly. 1 hardcoded Statsig key in app-portal (URGENT).",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-18",
+      "preship_action": "Fix app-portal/modules/website/public/views/partials/layout/technical_foot.liquid:19 before shipping."
+    },
+    {
+      "id": "pipe-vars-through-json-filter",
+      "file": "commands.md",
+      "applies_to": ["command", "form", "page"],
+      "severity": "error",
+      "evidence": "runtime-failure",
+      "evidence_source": "5+ unsafe parse_json instances found. Critical security issue in production code.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-11",
+      "preship_action": "Fix all unsafe parse_json blocks (R-11 entry lists locations) before shipping."
+    },
+    {
+      "id": "forms-no-form-tag",
+      "file": "forms.md",
+      "applies_to": ["form"],
+      "severity": "error",
+      "evidence": "real-project",
+      "evidence_source": "Rule sound. 4 violations in canonical repos must be fixed before shipping.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-5",
+      "preship_action": "Fix 4 deprecated {% form %} usages before shipping (see audit batch 1)."
+    },
+    {
+      "id": "modules-always-present",
+      "file": "modules.md",
+      "applies_to": ["global"],
+      "severity": "info",
+      "evidence": "real-project",
+      "evidence_source": "Rewrite of original R-8/R-17. Modules are checked-in source code under modules/ folders, always present, never installed at runtime. Versions vary across instances.",
+      "audit_ref": "audit/v0-conflicts.md#open-questions",
+      "supersedes": ["modules-never-install (original R-8)", "never-edit-modules-folder (original R-17)"]
+    },
+    {
+      "id": "pages-prefer-partials-for-shared-html",
+      "file": "pages.md",
+      "applies_to": ["page"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "Rewrite of original R-1. Pages may contain inline HTML for simple content. HTML reused across pages should be extracted to partials.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-1"
+    },
+    {
+      "id": "graphql-in-partials-restricted",
+      "file": "partials.md",
+      "applies_to": ["partial"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "Rewrite of original R-2. GraphQL permitted in data-heavy block partials, calculations, and callbacks. Forbidden in pure presentation partials.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-2"
+    },
+    {
+      "id": "commands-build-check-execute",
+      "file": "commands.md",
+      "applies_to": ["command"],
+      "severity": "warning",
+      "evidence": "skill-only",
+      "evidence_source": "Pattern documented in skill but only 1 real implementation in 438 files. Tagged aspirational pending team decision.",
+      "audit_ref": "audit/v0-conflicts-batch1.md#rule-r-4",
+      "aspirational": true
+    },
+    {
+      "id": "validate-input-in-check-stage",
+      "file": "commands.md",
+      "applies_to": ["command"],
+      "severity": "warning",
+      "evidence": "real-project",
+      "evidence_source": "Form-framework validation handles HTML form input. Explicit check required for non-form API endpoints.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-10"
+    },
+    {
+      "id": "extract-reusable-validations",
+      "file": "commands.md",
+      "applies_to": ["command", "form"],
+      "severity": "info",
+      "evidence": "real-project",
+      "evidence_source": "Module-level extraction observed. Recommend extracting when a validation is reused 2+ times.",
+      "audit_ref": "audit/v0-conflicts-batch2.md#rule-r-16"
+    }
+  ],
+  "deferred_decisions": [
+    {
+      "id": "events-via-background-tag",
+      "reason": "Original R-23. No {% background %} usage anywhere in the corpus. Deferred until team decides whether this is current/future/different-codebase.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-23"
+    },
+    {
+      "id": "run-cli-audit-before-deploy",
+      "reason": "Original R-20. Process rule, not code rule. No CI evidence in any reference repo. Deferred until team confirms whether to keep in corpus or move out.",
+      "audit_ref": "audit/v0-conflicts-batch3.md#rule-r-20"
+    }
+  ]
+}

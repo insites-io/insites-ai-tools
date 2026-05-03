@@ -1,0 +1,19 @@
+{
+  "id": "module-detection-cms",
+  "module": "cms",
+  "label": "CMS",
+  "when": {
+    "any": [
+      {
+        "signal": "has_marketing_sections"
+      },
+      {
+        "signal": "has_static_pages"
+      }
+    ]
+  },
+  "rationale": "Marketing sections (hero, feature grids, articles) become editable Liquid pages.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

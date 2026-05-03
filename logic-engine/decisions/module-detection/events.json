@@ -1,0 +1,33 @@
+{
+  "id": "module-detection-events",
+  "module": "events",
+  "label": "Events",
+  "when": {
+    "any": [
+      {
+        "signal": "has_event_listings"
+      },
+      {
+        "signal": "has_booking_form"
+      },
+      {
+        "signal": "has_ticket_purchase"
+      }
+    ]
+  },
+  "rationale": "Event listings, RSVP, and ticketing flows match the Events module's bookings/attendees model.",
+  "scaffold": "events-skeleton",
+  "reference": [
+    {
+      "repo": "addon-events",
+      "path": "modules/events/public/views/pages/upcoming-events.liquid"
+    },
+    {
+      "repo": "addon-events",
+      "path": "modules/events/public/views/pages/purchase-ticket.liquid"
+    }
+  ],
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}
