@@ -99,6 +99,7 @@ Need data operations?
 Need CRM operations?
 ├─ Start here (overview, audience routing)         → modules/crm/README.md
 ├─ Look up V2 REST endpoints, conventions, errors  → modules/crm/api.md
+├─ Look up field-by-field schema (types, required, IIA columns) → modules/crm/schema.md
 ├─ Worked HTTP examples for common flows           → modules/crm/patterns.md
 ├─ API edges and quirks (no Bearer prefix, etc.)   → modules/crm/gotchas.md
 ├─ Configure custom fields / system fields / webhooks in IIA → modules/crm/configuration.md

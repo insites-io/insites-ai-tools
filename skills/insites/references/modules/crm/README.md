@@ -6,6 +6,7 @@ The Insites CRM module manages contacts, companies, and the work attached to the
 
 | If you're… | Read |
 |---|---|
+| Looking up the field shape of a CRM resource (types, required, IIA columns) | [`schema.md`](schema.md) |
 | Building an external app that calls the CRM API | [`api.md`](api.md) |
 | Calling these endpoints from inside an Insites Liquid app | [`api.md`](api.md) + [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) (when written) |
 | Looking up the IIA admin paths to configure custom fields, system fields, webhooks | [`configuration.md`](configuration.md) |
@@ -24,6 +25,7 @@ The CRM exposes a V2 REST API at `/crm/api/v2/...`. **The V2 API is the preferre
 modules/crm/
 ├── README.md            ← you are here
 ├── api.md               ← V2 REST endpoints (CRM-specific resources)
+├── schema.md            ← field-by-field shape of every resource (types, required, IIA columns)
 ├── configuration.md     ← IIA admin walkthrough (custom fields, system fields, webhooks)
 ├── patterns.md          ← worked HTTP examples for common flows
 ├── gotchas.md           ← API edges and quirks

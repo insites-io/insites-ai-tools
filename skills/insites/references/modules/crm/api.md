@@ -4,6 +4,8 @@ The CRM module exposes a V2 REST API at the `/crm/api/v2/...` URL prefix. It cov
 
 This document describes the **CRM-specific** resources. Resources owned by CRM but consumed cross-module (tasks, activities, attachments, event streams) live under [globals/](globals/) at the same `/crm/api/v2/...` URL space.
 
+For the field-by-field shape of every CRM resource (types, required flags, related-record references, IIA list-table columns, wire ↔ storage naming), see [schema.md](schema.md).
+
 For authentication, see [`references/api/authentication.md`](../../api/authentication.md). Every request needs an `Authorization` header carrying the raw instance API key — there is no `Bearer` prefix.
 
 ---
