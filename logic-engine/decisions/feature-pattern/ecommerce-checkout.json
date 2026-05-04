@@ -1,0 +1,27 @@
+{
+  "id": "feature-pattern-ecommerce-checkout",
+  "kind": "feature-pattern",
+  "intent_keywords": ["checkout", "cart", "buy", "purchase", "payment", "shopping cart"],
+  "when": {
+    "all": [
+      { "signal": "has_cart_form" },
+      { "signal": "has_checkout_route" }
+    ]
+  },
+  "module_version_required": {
+    "ecommerce": ">= 5.11.1"
+  },
+  "then": {
+    "scaffold": "ecommerce-checkout-skeleton",
+    "reference": [
+      { "repo": "addon-ecommerce", "path": "modules/ecommerce/public/views/pages/checkout/checkout.liquid" },
+      { "repo": "addon-ecommerce", "path": "modules/ecommerce/public/views/pages/checkout/checkout-billing.liquid" },
+      { "repo": "addon-ecommerce", "path": "modules/ecommerce/public/views/pages/checkout/checkout-payment.liquid" },
+      { "repo": "addon-ecommerce", "path": "modules/ecommerce/public/forms/checkout/checkout_payment.liquid" }
+    ],
+    "rationale": "Site has cart + checkout signals. Use the canonical ecommerce checkout flow from addon-ecommerce; do not build custom."
+  },
+  "confidence": "high",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

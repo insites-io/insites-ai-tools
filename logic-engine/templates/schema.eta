@@ -1,0 +1,13 @@
+# Schema: <%= it.resource %>
+# See logic-engine/rules/schema.md
+# Properties accessed in GraphQL via property() / property_int() / property_boolean() etc.
+
+name: <%= it.resource %>
+properties:
+<% it.properties.forEach(function(p) { -%>
+  - name: <%= p.name %>
+    type: <%= p.type || 'string' %>
+<% if (p.required) { -%>
+    # required at command-validation time, not at schema level
+<% } -%>
+<% }) -%>

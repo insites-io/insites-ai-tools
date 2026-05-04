@@ -1,0 +1,18 @@
+{
+  "id": "scaffold-auth-policy",
+  "kind": "scaffold",
+  "intent_keywords": ["authorization policy", "auth gate", "page protection", "login required"],
+  "params": {
+    "policy_name": "snake_case (e.g. 'is_user_logged_in')",
+    "redirect_to": "404 | 401 | sign-in | <slug>"
+  },
+  "then": {
+    "scaffold": "auth-policy-skeleton",
+    "files": [
+      { "template": "auth-policy.eta", "path": "app/authorization_policies/{{policy_name}}.liquid" }
+    ],
+    "rationale": "Authorization policies enforce access control before page logic runs. Always echo true or false explicitly; handle nil defensively."
+  },
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "module-detection-assets",
+  "module": "assets",
+  "label": "Assets",
+  "when": {
+    "any": [
+      {
+        "signal": "has_images_count",
+        "gte": 1
+      },
+      {
+        "signal": "has_downloadable_files"
+      }
+    ]
+  },
+  "confidence_thresholds": {
+    "high": {
+      "signal": "has_images_count",
+      "gte": 8
+    },
+    "medium": {
+      "signal": "has_images_count",
+      "gte": 1
+    }
+  },
+  "rationale": "Images and downloadable files migrate into versioned asset storage with on-the-fly resizing.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

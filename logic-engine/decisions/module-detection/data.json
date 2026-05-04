@@ -1,0 +1,12 @@
+{
+  "id": "module-detection-data",
+  "module": "data",
+  "label": "Data",
+  "when": {
+    "signal": "has_data_collection_segments"
+  },
+  "rationale": "Repeating URL segments (blog, services, listings, etc.) become Data records, not separate CMS pages.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

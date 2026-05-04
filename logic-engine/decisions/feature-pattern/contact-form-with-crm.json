@@ -1,0 +1,21 @@
+{
+  "id": "feature-pattern-contact-form-with-crm",
+  "kind": "feature-pattern",
+  "intent_keywords": ["contact form", "enquiry form", "lead capture", "newsletter signup", "feedback form"],
+  "when": {
+    "any": [
+      { "signal": "has_contact_form" },
+      { "signal": "has_enquiry_form" }
+    ]
+  },
+  "then": {
+    "scaffold": "form-with-crm-skeleton",
+    "reference": [
+      { "repo": "app-portal", "path": "modules/portal/public/forms/account/my_details.liquid" }
+    ],
+    "rationale": "Form submissions should write to a CRM contact record (with deduplication by email) and log the submission as an activity. Avoid building custom contact storage."
+  },
+  "confidence": "high",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -1,0 +1,34 @@
+{# Page template — controller pattern with authorization + delegation to partials.
+   See logic-engine/rules/pages.md for the rules this template enforces:
+   - pages-one-http-method: single method declared in front matter
+   - pages-prefer-partials-for-shared-html: rendered HTML delegated to partials when complex
+
+   Params:
+     slug             — page URL slug (e.g. 'products' or 'products/:id')
+     method           — get | post | put | patch | delete
+     layout           — module-equivalent layout path (e.g. 'modules/website/default')
+     auth_policies    — array of policy names (optional)
+     metadata         — { title, description }
+     partial_to_render — partial path to delegate body to (optional; if omitted, body is empty for the user to fill)
+#}
+---
+slug: <%= it.slug %>
+method: <%= it.method || 'get' %>
+layout: <%= it.layout || 'modules/website/default' %>
+<% if (it.auth_policies && it.auth_policies.length > 0) { -%>
+authorization_policies:
+<% it.auth_policies.forEach(function(p) { -%>
+  - <%= p %>
+<% }) -%>
+<% } -%>
+metadata: {
+  "title": "<%= it.metadata && it.metadata.title || it.slug %>",
+  "description": "<%= it.metadata && it.metadata.description || '' %>"
+}
+---
+
+<% if (it.partial_to_render) { -%>
+{% render '<%= it.partial_to_render %>' %}
+<% } else { -%>
+{% comment %} TODO: page body. If reusable across multiple pages, extract to a partial in app/views/partials/ {% endcomment %}
+<% } -%>

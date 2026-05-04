@@ -1,0 +1,23 @@
+{
+  "id": "feature-pattern-events-ticket-purchase",
+  "kind": "feature-pattern",
+  "intent_keywords": ["event", "ticket", "rsvp", "booking", "register for"],
+  "when": {
+    "any": [
+      { "signal": "has_ticket_purchase" },
+      { "signal": "has_event_listings" }
+    ]
+  },
+  "then": {
+    "scaffold": "events-ticket-skeleton",
+    "reference": [
+      { "repo": "addon-events", "path": "modules/events/public/views/pages/purchase-ticket.liquid" },
+      { "repo": "addon-events", "path": "modules/events/public/views/pages/upcoming-events.liquid" },
+      { "repo": "addon-events", "path": "modules/events/public/views/pages/purchase-ticket-confirmation.liquid" }
+    ],
+    "rationale": "Site has event/ticketing signals. Use the canonical events flow from addon-events."
+  },
+  "confidence": "high",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

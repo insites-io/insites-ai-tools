@@ -1,0 +1,22 @@
+{
+  "id": "module-detection-locator",
+  "module": "locator",
+  "label": "Locator",
+  "when": {
+    "any": [
+      {
+        "signal": "has_store_finder"
+      },
+      {
+        "signal": "has_location_segments"
+      },
+      {
+        "signal": "has_map_embed"
+      }
+    ]
+  },
+  "rationale": "Store/branch/dealer finders with maps and filters fit the Locator pattern.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

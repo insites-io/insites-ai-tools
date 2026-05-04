@@ -1,0 +1,24 @@
+{
+  "id": "feature-pattern-auth-login-flow",
+  "kind": "feature-pattern",
+  "intent_keywords": ["login", "sign in", "sign up", "register", "password reset", "authentication"],
+  "when": {
+    "any": [
+      { "signal": "has_login_form" },
+      { "signal": "has_signup_form" },
+      { "signal": "has_account_dashboard" }
+    ]
+  },
+  "then": {
+    "scaffold": "auth-login-skeleton",
+    "reference": [
+      { "repo": "app-portal", "path": "modules/portal/public/views/pages/sign-in.liquid" },
+      { "repo": "app-seedling", "path": "modules/dashboard/public/authorization_policies/is_user_logged_in.liquid" },
+      { "repo": "app-seedling", "path": "modules/dashboard/public/views/pages/account/2fa.liquid" }
+    ],
+    "rationale": "Auth flows use the Permissions module. Reference app-portal for the sign-in pattern; app-seedling for canonical authorization policies."
+  },
+  "confidence": "high",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

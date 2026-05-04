@@ -1,0 +1,42 @@
+{# Command template — build → check → execute pattern.
+   See logic-engine/rules/commands.md for the rules this template enforces:
+   - pipe-vars-through-json-filter (security): every var piped through | json
+   - commands-return-valid-errors: returns object with valid + errors keys
+   - commands-build-check-execute: three explicit stages
+   - commands-args-object-syntax: GraphQL mutation called with args: object
+
+   Params:
+     resource         — snake_case resource name (e.g. 'product')
+     action           — create | update | delete
+     properties       — array of { name, type, required }
+#}
+{% comment %} === BUILD === {% endcomment %}
+{% parse_json object %}
+  {
+<% it.properties.forEach(function(p, i) { -%>
+    "<%= p.name %>": {{ <%= p.name %> | json }}<%= i < it.properties.length - 1 ? ',' : '' %>
+<% }) -%>
+  }
+{% endparse_json %}
+
+{% comment %} === CHECK === {% endcomment %}
+{% assign c = '{ "errors": {}, "valid": true }' | parse_json %}
+<% it.properties.filter(function(p) { return p.required; }).forEach(function(p) { -%>
+{% if object.<%= p.name %> == blank %}
+  {% assign field_errors = c.errors.<%= p.name %> | default: '[]' | parse_json | add_to_array: "can't be blank" %}
+  {% hash_assign c['errors']['<%= p.name %>'] = field_errors %}
+  {% hash_assign c['valid'] = false %}
+{% endif %}
+<% }) -%>
+{% assign object = object | hash_merge: c %}
+
+{% comment %} === EXECUTE === {% endcomment %}
+{% if object.valid %}
+  {% graphql r = '<%= it.resource %>/<%= it.action %>', args: object %}
+  {% if r.errors %}
+    {% log r, type: 'ERROR: <%= it.resource %>/<%= it.action %>' %}
+  {% endif %}
+  {% assign object = r.record_<%= it.action %> | hash_merge: c %}
+{% endif %}
+
+{% return object %}

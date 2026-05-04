@@ -1,0 +1,28 @@
+{
+  "id": "scaffold-crud-resource",
+  "kind": "scaffold",
+  "intent_keywords": ["create resource", "crud", "new entity", "manage records"],
+  "params": {
+    "resource": "snake_case identifier (e.g. 'product')",
+    "properties": "array of { name, type, required }"
+  },
+  "then": {
+    "scaffold": "crud-resource-skeleton",
+    "files": [
+      { "template": "schema.eta", "path": "app/schema/{{resource}}.yml" },
+      { "template": "graphql-crud.eta", "path": "app/graphql/{{resource}}/search.graphql" },
+      { "template": "graphql-crud.eta", "path": "app/graphql/{{resource}}/find.graphql" },
+      { "template": "graphql-crud.eta", "path": "app/graphql/{{resource}}/create.graphql" },
+      { "template": "graphql-crud.eta", "path": "app/graphql/{{resource}}/update.graphql" },
+      { "template": "graphql-crud.eta", "path": "app/graphql/{{resource}}/delete.graphql" },
+      { "template": "command.eta", "path": "app/lib/commands/{{resource}}/create.liquid" },
+      { "template": "command.eta", "path": "app/lib/commands/{{resource}}/update.liquid" },
+      { "template": "page.eta", "path": "app/views/pages/{{resource}}/index.liquid" },
+      { "template": "page.eta", "path": "app/views/pages/{{resource}}/new.liquid" },
+      { "template": "partial.eta", "path": "app/views/partials/{{resource}}/form.liquid" }
+    ],
+    "rationale": "Standard CRUD layout: schema declares the table, GraphQL operations cover queries + mutations, Commands wrap state changes with build → check → execute, pages route to partials."
+  },
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "module-detection-api",
+  "module": "api",
+  "label": "API",
+  "always_available": true,
+  "rationale": "Always provisioned for every module. Not migrated from the source.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}
