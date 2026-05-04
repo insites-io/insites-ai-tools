@@ -119,6 +119,27 @@ Need CRM operations?
 └─ Pipelines / stages / opportunities / cases — NOT in v2 API (legacy v1 archived)
 ```
 
+### "I need CMS-managed content (pages, layouts, partials, globals, emails, …)"
+
+```
+Need CMS operations?
+├─ Start here (overview, file-based stance)               → modules/cms/README.md
+├─ Look up object-type field shapes / front-matter        → modules/cms/metadata.md
+├─ Liquid-side consumption examples                       → modules/cms/patterns.md
+├─ API edges / partial-alias quirks / overrides           → modules/cms/gotchas.md
+├─ IIA admin walkthrough per object type                  → modules/cms/configuration.md
+├─ Override layouts/partials, hook_module_info             → modules/cms/advanced.md
+│
+├─ Pages (URL-addressable controllers)                    → modules/cms/metadata.md (Pages)
+├─ Layouts (HTML scaffold wrappers)                       → modules/cms/metadata.md (Layouts)
+├─ Partials (reusable HTML snippets, alias paths)         → modules/cms/metadata.md (Partials)
+├─ Web Files (static .js/.css/.html assets)               → modules/cms/metadata.md (Web Files)
+├─ Global Content (company-wide settings record)          → modules/cms/metadata.md (Global Content)
+├─ Collections (data-backed listing views)                → modules/cms/metadata.md (Collections)
+├─ Emails / SMS (templates)                               → modules/cms/metadata.md (Emails/SMS)
+└─ Authorization Policies (page-gating rules)             → modules/cms/metadata.md (Authorization Policies)
+```
+
 ### "I need business logic"
 
 ```
@@ -328,6 +349,7 @@ Use the decision trees above to identify which category applies, then load the m
 | Category | Reference |
 |----------|-----------|
 | CRM (insites_core) | `references/modules/crm/` |
+| CMS (insites_cms) | `references/modules/cms/` |
 | Module Template | `references/modules/template/` |
 
 > Copy `references/modules/template/` to create documentation for new Insites modules. Each module gets its own directory with: README.md, api.md, configuration.md, patterns.md, gotchas.md, advanced.md.
