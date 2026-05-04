@@ -66,7 +66,7 @@ A person record. Core CRM resource. Extensive field set including identity, cont
 **IIA list-table columns** (visible in `<your-instance>/admin/insites#/crm/contacts`):
 `name` · `email` · `email_2` · `job_title` · `company` · `assigned_to` · `category` · `type` · `lead_source` · `created_at`
 
-Other fields exist on the resource but are only visible in the detail view, not the list table. The vue field model also includes an `assigned_groups` field flagged `// REVIEW` in the storage schema — treat as WIP, do not depend on it.
+Other fields exist on the resource but are only visible in the detail view, not the list table.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -114,7 +114,7 @@ Other fields exist on the resource but are only visible in the detail view, not 
 
 ## Contact Addresses
 
-Address records linked to a contact. Multiple per contact. Standard postal address fields plus geocoding.
+Address records linked to a contact. Multiple per contact. Standard postal address fields plus geocoding. The IIA UI for managing them is the **Addresses** sub-tab on the contact detail view at `<your-instance>/admin/insites#/crm/contacts/<uuid>/addresses` — the same `Addresses` component is reused for both contacts and companies, so the field set and column layout are identical to *Company Addresses* below.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -253,7 +253,7 @@ A company record. Core CRM resource. Identity, contact info, social links, alert
 
 ## Company Addresses
 
-Address records linked to a company. Same fields as contact_addresses except the parent reference is `company` instead of `contact`.
+Address records linked to a company. Same field set as contact_addresses except the parent reference is `company` instead of `contact`. The IIA UI is the **Addresses** sub-tab on the company detail view at `<your-instance>/admin/insites#/crm/companies/<uuid>/addresses` — same `Addresses` component as for contacts.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
