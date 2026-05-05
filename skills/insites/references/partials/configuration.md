@@ -34,12 +34,9 @@ app/views/partials/
 │   ├── helpers/           # Utility functions
 │   │   ├── format_price.liquid
 │   │   └── calculate_tax.liquid
-│   ├── consumers/         # Event handlers
-│   │   └── order_created/
-│   │       └── send_email.liquid
-│   └── tests/             # Test files (*_test.liquid)
-│       └── products/
-│           └── create_test.liquid
+│   └── consumers/         # Event handlers
+│       └── order_created/
+│           └── send_email.liquid
 ├── products/              # Feature-specific UI templates
 │   ├── card.liquid
 │   ├── list.liquid

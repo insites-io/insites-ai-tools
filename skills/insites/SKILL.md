@@ -296,7 +296,6 @@ Need deployment?
 ├─ Install modules → cli/ (insites-cli modules pull)
 ├─ Set environment constants → constants/ (insites-cli constants set)
 ├─ Run migrations → migrations/
-├─ Run tests → testing/
 ├─ Lint/validate code → cli/ (insites-cli audit)
 ├─ Sync files in development → cli/ (insites-cli sync)
 └─ Environment configuration → configuration/
@@ -393,7 +392,6 @@ Use the decision trees above to identify which category applies, then load the m
 |----------|-----------|
 | CLI | `references/cli/` |
 | Deployment | `references/deployment/` |
-| Testing | `references/testing/` |
 
 ## Critical Architecture Rules
 

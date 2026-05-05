@@ -21,10 +21,6 @@ insites-cli audit || exit 1
 # Deploy
 insites-cli deploy $ENV
 
-# Test step — CLI test runner not yet shipped. Until it lands, gate on a
-# manual or browser-driven check at <$ENV-instance>/_tests/run.
-echo "Run tests in-browser at <${ENV}-instance>/_tests/run before continuing."
-
 # Check for errors via logsv2 search subcommand
 echo "Checking logs for errors..."
 insites-cli logsv2 search

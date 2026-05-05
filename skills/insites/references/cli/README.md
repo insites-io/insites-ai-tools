@@ -59,9 +59,6 @@ insites-cli data import dev --path=data.json    # Import data
 insites-cli data clean dev                      # Clean all data (DANGEROUS)
 ```
 
-### Testing
-> A CLI test runner (`insites-cli test run`) is not yet shipped. Until it lands, run tests in-browser at `<your-instance>/_tests/run` after deploy. See [`../testing/api.md`](../testing/api.md) for the test-execution endpoints and the assertion API.
-
 ## Linting (insites-cli audit)
 
 **Must run after EVERY file change.**

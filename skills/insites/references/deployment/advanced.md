@@ -22,13 +22,10 @@ production_green:
 # 1. Deploy to inactive environment (green)
 insites-cli deploy production_green
 
-# 2. Run tests in-browser at <production_green-instance>/_tests/run
-#    (CLI test runner not yet shipped)
-
-# 3. Switch traffic to green
+# 2. Switch traffic to green
 # Update load balancer / DNS
 
-# 4. Keep blue as instant rollback
+# 3. Keep blue as instant rollback
 ```
 
 ## Canary Deployments
@@ -164,19 +161,8 @@ jobs:
       - run: npm install -g /insites-cli
       - run: insites-cli audit
 
-  test:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: npm install -g /insites-cli
-      # Test step pending — CLI test runner not yet shipped.
-      # Until it lands, gate this stage on a manual / browser-driven test
-      # pass at <staging-instance>/_tests/run.
-      - run: echo "Manual test pass required — <staging>/_tests/run"
-
   deploy_staging:
-    needs: test
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

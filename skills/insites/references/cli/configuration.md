@@ -107,4 +107,3 @@ insites-cli sync staging --config ./config/.insites
 
 - [CLI Commands Reference](./api.md)
 - [Deployment Patterns](../deployment/patterns.md)
-- [Testing Setup](../testing/configuration.md)

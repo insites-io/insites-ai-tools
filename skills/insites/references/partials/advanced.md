@@ -88,22 +88,10 @@ Each `{% render %}` and `{% function %}` call has overhead. Optimize by:
 {% render 'products/card_list', products: products %}
 ```
 
-## Testing Function Partials
-
-Function partials (commands, helpers) are testable via the tests module:
-
-```liquid
-{% comment %} app/lib/tests/helpers/format_price_test.liquid {% endcomment %}
-{% function result = 'lib/helpers/format_price', amount: 19.99, currency: 'USD' %}
-{% function contract = 'modules/tests/assertions/equal', contract: contract, given: result, expected: '$19.99' %}
-{% return contract %}
-```
-
 ## See Also
 
 - [Partials Overview](README.md)
 - [patterns.md](patterns.md) — common workflows
 - [gotchas.md](gotchas.md) — errors and limits
-- [Testing](../testing/README.md) — testing partials
 - [Caching](../caching/README.md) — caching partial output
 - [Modules](../modules/template/README.md) — module reference template

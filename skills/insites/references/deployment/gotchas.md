@@ -211,25 +211,6 @@ properties:
     type: string
 ```
 
-## Test Failures During Deployment
-
-### Tests Fail on Staging
-
-**Issue**: A test fails when running `<staging-instance>/_tests/run`. (A CLI test runner is not yet shipped — tests run in-browser today.)
-
-**Impact**: Production deployment blocked.
-
-**Solution**:
-```bash
-# Run tests against dev first by hitting <dev-instance>/_tests/run
-
-# Check test file syntax
-cat app/lib/test/user_test.liquid
-
-# Fix failing tests, redeploy, rerun in-browser:
-#   <staging-instance>/_tests/run?name=test/your_test
-```
-
 ## Deployment Rollback
 
 ### Cannot Rollback Automatically
@@ -237,7 +218,7 @@ cat app/lib/test/user_test.liquid
 **Issue**: No automatic rollback mechanism
 
 **Mitigation**:
-1. Always test on staging first
+1. Always verify on staging first
 2. Create backup migrations
 3. Version schema changes
 4. Keep previous code branch ready
