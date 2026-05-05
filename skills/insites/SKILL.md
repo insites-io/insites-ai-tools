@@ -14,49 +14,38 @@ description: Consolidated skill for building on the Insites platform. Use decisi
 
 ---
 
-# CRITICAL!
+# Critical rules
 
-This skill defines a **strict, non-interpretable, sacred rules to help you avoid mistakes**.
-You **MUST follow guidance exactly as written**, without omission, substitution, optimization, or commentary.
+Follow these rules as written. Where they say "never" or "must", treat that literally — those constraints exist to prevent specific real failures (Liquid syntax errors, security holes, audit failures). Conventions described in plain prose elsewhere in this document are guidance, not absolutes; use judgement.
 
-**Constraints**
-* Failure to follow constitutes NON-COMPLIANCE and VIOLATION.
+## 1. Source of truth
 
+- The references in this document are the source of truth for Insites conventions.
+- Don't invent undocumented behaviors, APIs, configurations, Liquid tags/filters, or directory structures. If you can't find it documented, ask rather than guess.
+- The GraphQL schema is strict and closed — custom GraphQL types are not creatable.
+- When uncertain, consult the reference file rather than improvising.
 
-## 1. Source of Truth
+## 2. Pre-flight validation
 
-- References provided in this document is the ONLY source of truth
-- NEVER invent undocumented behaviors, APIs, configurations, Liquid tags/filters, or directory structures
-- The GraphQL schema is strict and closed; you CANNOT create custom GraphQL types
-- When uncertain, consult reference files
-
-## 2. Pre-Flight Validation (Required Before Every Change)
-
-- **After ANY file change, you MUST run the linter:**
+After every file change, run the linter:
 
 ```bash
 insites-cli audit
 ```
 
-Must pass with 0 errors before deployment.
+The audit must pass with zero errors before deployment. The hard requirements it enforces:
 
-**NO OPTIONAL REVIEW**
+- Partial filenames have no underscore prefix
+- `render 'path/name'` resolves to `app/views/partials/path/name.liquid`
+- Pages have one HTTP method each
+- Pages contain no raw HTML/JS/CSS — delegate to partials
+- Partials never call `{% graphql %}` — pages own data fetching
+- User-facing text is hardcoded directly in English
+- No hardcoded credentials — use `context.constants`
 
-- [ ] NO underscore prefix in partial filenames
-- [ ] `render 'path/name'` resolves to `app/views/partials/path/name.liquid`
-- [ ] Pages have ONE HTTP method each
-- [ ] NO raw HTML/JS/CSS in pages (pages = controllers)
-- [ ] NO GraphQL calls from partials (pages only)
-- [ ] Hardcode user-facing text directly in English
-- [ ] NO hardcoded credentials (use `context.constants`)
-- [ ] `insites-cli audit` passes
+## 3. Decision trees
 
-
-## 3. Quick Decision Trees
-
-These Quick Decision Trees are designed to deterministically map any developer request to the correct Insites reference domain(s).
-They use ASCII tree visualizations for clarity and are exhaustive for all core tasks you would perform.
-You MUST fully understand requirements, consult these trees + indicated references and resolve all ambiguity before writing any code.
+The decision trees below map common developer questions to the relevant reference doc. Walk through the matching tree before writing code so you load the right reference.
 
 ---
 
@@ -386,54 +375,28 @@ Use the decision trees above to identify which category applies, then load the m
 
 ## Critical Architecture Rules
 
-### 1. Pages = Controllers (NEVER put HTML in pages)
-```
-Page files: fetch data via {% graphql %}, delegate to partials via {% render %}
-Partials: contain ALL HTML/JS/CSS presentation
-```
+### 1. Pages are controllers — no HTML in page files
+Page files fetch data via `{% graphql %}` and delegate rendering to partials via `{% render %}`. Partials hold all HTML/JS/CSS presentation. Putting HTML directly in a page is a hard rule the audit enforces.
 → `references/pages/`, `references/partials/`
 
-### 2. GraphQL in Pages Only
-```
-NEVER call {% graphql %} from partials.
-Pages own data fetching; partials receive data through render arguments.
-```
+### 2. GraphQL only in pages
+Partials never call `{% graphql %}`. Pages own data fetching; partials receive their data through render arguments.
 → `references/graphql/`
 
-### 3. Command Pattern (build → check → execute)
-```
-All create/update/delete operations go through Commands
-Commands use inline build → check → execute pattern
-Validation errors are returned, not thrown
-```
+### 3. Command pattern (build → check → execute)
+All create/update/delete operations go through commands. Commands follow the inline build → check → execute pattern, and validation errors are returned (not thrown).
 → `references/commands/`
 
-### 4. Module System (READ-ONLY)
-```
-modules/ directory is READ-ONLY — never edit files there.
-Modules are preinstalled on each instance and updated via the Insites console
-(not via the CLI).
-Override module behavior at the app level (place a same-path file under app/
-and Insites will resolve to your file ahead of the module's).
-```
+### 4. Modules are read-only
+Don't edit files under `modules/` — that tree is replaced wholesale on every module update, so changes are lost. Modules are preinstalled per instance and updated through the Insites console, not the CLI. To override module behavior, place a same-path file under your `app/` tree; Insites resolves your file ahead of the module's.
 → `references/modules/`
 
-### 5. Extract Reusable Code (DRY)
-```
-When you write the same logic 2+ times, extract it into a reusable partial.
-Use {% function %} for partials that return data.
-Use {% render %} for partials that produce HTML.
-Repeated access checks belong in a reusable authorization_policies file
-referenced from page front matter, not duplicated inline.
-```
+### 5. Extract reusable code (DRY)
+When the same logic appears twice, extract it. Use `{% function %}` for partials that return data; use `{% render %}` for partials that produce HTML. Repeated access checks belong in a reusable `authorization_policies` file referenced from page front matter, not duplicated inline.
 → `references/partials/`
 
-### 6. Liquid Coding Standards
-```
-Do NOT line-wrap statements within {% liquid %} blocks
-Keep each statement on a single line
-Variables in Insites are LOCAL to the partial (use export tag to share)
-```
+### 6. Liquid coding standards
+Statements within `{% liquid %}` blocks must stay on a single line each — line-wrapping causes Liquid syntax errors. Variables in Insites are local to the partial; use the `export` tag to share them across renders.
 → `references/liquid/`
 
 ## Project Structure
@@ -443,9 +406,9 @@ project-root/
 ├── app/
 │   ├── assets/                    # Static files (images, fonts, styles, scripts)
 │   ├── views/
-│   │   ├── pages/                 # Controllers (NO HTML here)
+│   │   ├── pages/                 # Controllers (no HTML here)
 │   │   ├── layouts/               # Wrapper templates
-│   │   └── partials/              # Reusable template snippets (ALL HTML here)
+│   │   └── partials/              # Reusable template snippets (HTML lives here)
 │   ├── lib/
 │   │   ├── commands/              # Business logic (build → check → execute)
 │   │   ├── queries/               # Data retrieval wrappers
@@ -459,7 +422,7 @@ project-root/
 │   ├── migrations/                # Data seeding and schema migrations
 │   ├── authorization_policies/    # Access control policies
 │   └── config.yml                 # Feature flags and configuration
-├── modules/                       # Downloaded/custom modules (READ-ONLY)
+├── modules/                       # Downloaded/custom modules (read-only)
 ├── .insites                           # Environment endpoints/project root sentinel file
 └── package.json                   # (optional) Node.js dependencies
 ```
