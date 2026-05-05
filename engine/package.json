@@ -10,13 +10,15 @@
   },
   "files": [
     "dist/",
-    "../logic-engine/"
+    "logic-engine/"
   ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "biome check src/"
+    "lint": "biome check src/",
+    "prepack": "rm -rf logic-engine && cp -R ../logic-engine ./logic-engine && npm run build",
+    "postpack": "rm -rf logic-engine"
   },
   "dependencies": {
     "eta": "^3.4.0",

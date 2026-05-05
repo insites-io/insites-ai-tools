@@ -119,18 +119,68 @@ export const DecisionOutputSchema = z.object({
 });
 export type DecisionOutput = z.infer<typeof DecisionOutputSchema>;
 
-export const DecisionSchema = z.object({
+// Decision kinds have different shapes — module-detection puts module/label/rationale at the
+// top level (no `then` wrapper); feature-pattern and scaffold use `then: DecisionOutputSchema`.
+// They're modeled as a discriminated union on `kind`.
+
+const ConfidenceSchema = z.enum(["high", "medium", "low"]).default("medium");
+const StatusSchema = z.enum(["draft", "active", "deprecated"]).default("active");
+
+export const ModuleDetectionDecisionSchema = z.object({
   id: z.string(),
-  kind: z.enum(["module-detection", "feature-pattern", "scaffold"]),
+  kind: z.literal("module-detection"),
+  module: z.string(),
+  label: z.string(),
+  intent_keywords: z.array(z.string()).optional(),
+  when: ConditionSchema.optional(),
+  rationale: z.string(),
+  audit_ref: z.string().optional(),
+  status: StatusSchema,
+});
+export type ModuleDetectionDecision = z.infer<typeof ModuleDetectionDecisionSchema>;
+
+export const FeaturePatternDecisionSchema = z.object({
+  id: z.string(),
+  kind: z.literal("feature-pattern"),
   intent_keywords: z.array(z.string()).optional(),
   when: ConditionSchema.optional(),
   module_version_required: z.record(z.string()).optional(),
   then: DecisionOutputSchema,
-  confidence: z.enum(["high", "medium", "low"]).default("medium"),
+  confidence: ConfidenceSchema,
   audit_ref: z.string().optional(),
-  status: z.enum(["draft", "active", "deprecated"]).default("active"),
+  status: StatusSchema,
 });
+export type FeaturePatternDecision = z.infer<typeof FeaturePatternDecisionSchema>;
+
+export const ScaffoldDecisionSchema = z.object({
+  id: z.string(),
+  kind: z.literal("scaffold"),
+  intent_keywords: z.array(z.string()).optional(),
+  params: z.record(z.string()).optional(),
+  when: ConditionSchema.optional(),
+  then: DecisionOutputSchema,
+  confidence: ConfidenceSchema.optional(),
+  audit_ref: z.string().optional(),
+  status: StatusSchema,
+});
+export type ScaffoldDecision = z.infer<typeof ScaffoldDecisionSchema>;
+
+export const DecisionSchema = z.discriminatedUnion("kind", [
+  ModuleDetectionDecisionSchema,
+  FeaturePatternDecisionSchema,
+  ScaffoldDecisionSchema,
+]);
 export type Decision = z.infer<typeof DecisionSchema>;
+
+/** True when a decision has a `then` block with structured output (feature-pattern or scaffold). */
+export function hasThen(d: Decision): d is FeaturePatternDecision | ScaffoldDecision {
+  return d.kind === "feature-pattern" || d.kind === "scaffold";
+}
+
+/** Get the rationale string from any decision shape. */
+export function rationaleOf(d: Decision): string {
+  return hasThen(d) ? d.then.rationale : d.rationale;
+}
 
 // ---------- Selection input/output ----------
 

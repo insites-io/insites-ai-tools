@@ -1,13 +1,7 @@
 import { loadDecisions, loadRules } from "./corpus.js";
 import { evaluateCondition, type EvaluationContext } from "./dsl.js";
 import { renderTemplate } from "./render.js";
-import type {
-  Decision,
-  FilePlan,
-  Rule,
-  SelectionInput,
-  SelectionResult,
-} from "./types.js";
+import { hasThen, type Decision, type FilePlan, type Rule, type SelectionInput, type SelectionResult } from "./types.js";
 
 /** Select rules whose applies_to overlaps the surface's relevant file kinds. */
 export async function selectRules(input: SelectionInput): Promise<Rule[]> {
@@ -40,7 +34,8 @@ export async function evaluateDecisions(input: SelectionInput): Promise<Decision
 export async function renderScaffolds(decisions: Decision[]): Promise<FilePlan[]> {
   const plans: FilePlan[] = [];
   for (const d of decisions) {
-    if (!d.then.files) continue;
+    // module-detection decisions have no `then` block — skip.
+    if (!hasThen(d) || !d.then.files) continue;
     const files = [];
     for (const f of d.then.files) {
       const rendered = await renderTemplate(f.template, f.params ?? {});

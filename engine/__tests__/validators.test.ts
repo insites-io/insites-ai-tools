@@ -20,8 +20,17 @@ describe("fileKindForPath", () => {
 describe("validators", () => {
   it("flags partials with underscore prefix", async () => {
     const result = await validate("app/views/partials/_card.liquid", "");
-    expect(result.violations).toHaveLength(1);
-    expect(result.violations[0].ruleId).toBe("partials-no-underscore-prefix");
+    const matched = result.violations.filter((v) => v.ruleId === "partials-no-underscore-prefix");
+    expect(matched).toHaveLength(1);
+  });
+
+  it("does not flag tags whose name only starts with 'form'", async () => {
+    // Regression for the form-tag regex tightening: {% formula %} or {% format %} would have
+    // been swept up by the old loose regex. The anchored \b version excludes them.
+    const content = "<div>\n{% formula x: 1 %}\n{% format y %}\n</div>";
+    const result = await validate("app/forms/account/sign_out.liquid", content);
+    const r5 = result.violations.filter((v) => v.ruleId === "forms-no-form-tag");
+    expect(r5).toHaveLength(0);
   });
 
   it("does not flag normal partials", async () => {

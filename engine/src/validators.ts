@@ -81,14 +81,19 @@ registerValidator("pipe-vars-through-json-filter", (filePath: string, content: s
   return violations;
 });
 
-/** R-5 / forms-no-form-tag: forbid the deprecated {% form %} tag. */
+/** R-5 / forms-no-form-tag: forbid the deprecated {% form %} tag.
+ *
+ * Matches `{% form ... %}` and `{% form %}` and the trim variants `{%- form ... -%}` etc.,
+ * but does NOT match other tags whose name happens to start with "form" (e.g. `{% format %}`
+ * if that ever exists, or `{% formula %}`). The `\b` boundary ensures the tag name is exactly
+ * `form` followed by a non-word character (whitespace or `%`).
+ */
 registerValidator("forms-no-form-tag", (filePath: string, content: string) => {
   const violations = [];
-  const tagRe = /\{%-?\s*form[\s\S]*?%\}/g;
+  // Anchor on the opening of the tag; `\b` after `form` guarantees it's not a longer tag name.
+  const openRe = /\{%-?\s*form\b/g;
   let m: RegExpExecArray | null;
-  while ((m = tagRe.exec(content)) !== null) {
-    // exclude tags like {% format ... %} which start with form-
-    if (/^\{%-?\s*form\s*$|^\{%-?\s*form\s/.test(m[0]) === false) continue;
+  while ((m = openRe.exec(content)) !== null) {
     const line = content.substring(0, m.index).split("\n").length;
     violations.push({
       ruleId: "forms-no-form-tag",

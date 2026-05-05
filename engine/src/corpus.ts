@@ -1,9 +1,25 @@
-import { promises as fs } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
 import path from "node:path";
 import yaml from "yaml";
 import { type Decision, DecisionSchema, type Rule, RuleFrontmatterSchema } from "./types.js";
 
-const CORPUS_ROOT = path.resolve(__dirname, "..", "..", "logic-engine");
+// Corpus resolution order:
+//   1. INSITES_LOGIC_ENGINE_CORPUS env var (explicit override — useful for tests)
+//   2. <package>/logic-engine/  — the bundled copy created by the prepack script
+//   3. <repo>/logic-engine/     — sibling dir during local dev
+//
+// __dirname works natively here: package.json has no "type": "module", so tsc compiles
+// `module: NodeNext` to CommonJS output where __dirname is a global.
+function resolveCorpusRoot(): string {
+  if (process.env.INSITES_LOGIC_ENGINE_CORPUS) {
+    return process.env.INSITES_LOGIC_ENGINE_CORPUS;
+  }
+  const bundled = path.resolve(__dirname, "..", "logic-engine");
+  if (existsSync(bundled)) return bundled;
+  return path.resolve(__dirname, "..", "..", "logic-engine");
+}
+
+const CORPUS_ROOT = resolveCorpusRoot();
 
 let rulesCache: Rule[] | null = null;
 let decisionsCache: Decision[] | null = null;
