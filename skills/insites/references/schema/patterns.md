@@ -134,7 +134,7 @@ mutation {
     table: "post"
     properties: [
       { name: "title", value: "My Post" }
-      { name: "tags", value: "[\"platformos\", \"tutorial\"]" }
+      { name: "tags", value: "[\"insites\", \"tutorial\"]" }
     ]
   }) { id }
 }

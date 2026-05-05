@@ -64,8 +64,7 @@ insites-cli deploy production
 Pull existing modules from an instance:
 
 ```bash
-insites-cli modules pull @platform-os/core dev
-insites-cli modules pull @platform-os/blog dev
+insites-cli modules pull <module-name> dev
 insites-cli modules pull my-custom-module dev
 ```
 

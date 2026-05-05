@@ -40,7 +40,7 @@ Usage:
 
 ```bash
 #!/bin/bash
-MODULES=("@platform-os/core" "@platform-os/blog" "my-module")
+MODULES=("module-a" "module-b" "my-module")
 ENV=$1
 
 for MODULE in "${MODULES[@]}"; do
