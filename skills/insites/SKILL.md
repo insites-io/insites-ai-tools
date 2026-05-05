@@ -69,7 +69,7 @@ Need a page or endpoint?
 ├─ JavaScript endpoint → pages/ (with .js.liquid extension)
 ├─ Form submission handler → pages/ (method: post) + forms/
 ├─ File download/redirect → pages/ + routing/
-├─ Admin-only page → pages/ + authorization_policies/
+├─ Admin-only page → pages/ + page front-matter `authorization_policies:`
 ├─ Layout wrapper → layouts/
 └─ Reusable UI component → partials/
 ```
@@ -168,9 +168,7 @@ Need business logic?
 ├─ React to something that happened → events-consumers/
 ├─ Run code asynchronously → background-jobs/
 ├─ Run code on a schedule → background-jobs/ (with delay)
-├─ Send email after an action → events-consumers/ + emails-sms/
-├─ Process payments → modules/payments/
-└─ Wrap a data query for reuse → lib/queries/
+└─ Send email after an action → events-consumers/ + emails-sms/
 ```
 
 ### "I need authentication & authorization"
@@ -178,11 +176,11 @@ Need business logic?
 ```
 Need auth?
 ├─ Get current user → authentication/ (context.current_user + GraphQL)
-├─ Check if user can do something → authorization_policies/ or inline check
-├─ Block unauthorized access (403) → authorization_policies in page front matter
-├─ Redirect if not permitted → inline unless/redirect_to pattern
+├─ Check if user can do something → page front-matter `authorization_policies:` or inline check
+├─ Block unauthorized access (403) → page front-matter `authorization_policies:` (each policy is a Liquid file at `app/authorization_policies/<name>.liquid` returning truthy/falsy)
+├─ Redirect if not permitted → inline unless/redirect_to pattern, or the policy's own `redirect_to` front-matter key
 ├─ Sign in a user → authentication/ (sign_in tag)
-├─ Define custom roles/permissions → authorization_policies/
+├─ Define custom access rules → write a new file at `app/authorization_policies/<name>.liquid`; reference it from page front matter
 ├─ OAuth2/social login → authentication/
 ├─ CSRF protection → forms/ (authenticity_token)
 └─ Spam protection (reCAPTCHA/hCaptcha) → forms/ (spam_protection tag)
@@ -240,7 +238,7 @@ Need Liquid help?
 ```
 Need forms?
 ├─ HTML form with CSRF → forms/ (use <form> tag, NOT {% form %})
-├─ File upload → forms/ + modules/common-styling/ (upload component)
+├─ File upload → forms/ (upload field type) + modules/cms/metadata.md (Web Files / Attachments)
 ├─ Form validation → commands/ (check stage)
 ├─ Display validation errors → partials/ (render errors from command result)
 ├─ Multi-step form → pages/ + sessions/
@@ -263,14 +261,10 @@ Need notifications?
 
 ```
 Need UI/styling?
-├─ CSS framework → modules/common-styling/ (pos-* classes ONLY)
-├─ View available components → /style-guide on your instance
+├─ View available styled components → /style-guide on your instance
 ├─ Layout structure → layouts/
 ├─ Reusable UI snippets → partials/
-├─ Static assets (images, fonts, JS) → assets/
-├─ Pagination component → modules/common-styling/ (pagination partial)
-├─ File upload widget → modules/common-styling/ (upload partial)
-└─ NEVER use Tailwind/Bootstrap/custom frameworks
+└─ Static assets (images, fonts, JS) → assets/
 ```
 
 ### "I need to integrate external services"
@@ -278,9 +272,6 @@ Need UI/styling?
 ```
 Need integrations?
 ├─ Call external REST API → api-calls/
-├─ Stripe payments → modules/payments/
-├─ OpenAI/AI features → modules/openai/
-├─ WebSocket/chat → modules/chat/
 ├─ OAuth2 providers → authentication/ (OAuth2 flow with sign_in tag)
 ├─ Webhook receiver → pages/ (POST endpoint)
 └─ Store API keys/secrets → constants/
@@ -293,7 +284,7 @@ Need deployment?
 ├─ Deploy to environment → deployment/ (insites-cli deploy)
 ├─ Watch logs → cli/ (insites-cli logsv2)
 ├─ Run Liquid/GraphQL ad-hoc → cli/ (insites-cli exec)
-├─ Install modules → cli/ (insites-cli modules pull)
+├─ Pull a module's code from an instance → cli/ (insites-cli modules pull)
 ├─ Set environment constants → constants/ (insites-cli constants set)
 ├─ Run migrations → migrations/
 ├─ Lint/validate code → cli/ (insites-cli audit)
@@ -404,9 +395,8 @@ Partials: contain ALL HTML/JS/CSS presentation
 
 ### 2. GraphQL in Pages Only
 ```
-NEVER call {% graphql %} from partials
-Wrap GraphQL calls in query files at app/lib/queries/
-Call queries via {% function result = 'lib/queries/...' %}
+NEVER call {% graphql %} from partials.
+Pages own data fetching; partials receive data through render arguments.
 ```
 → `references/graphql/`
 
@@ -420,23 +410,21 @@ Validation errors are returned, not thrown
 
 ### 4. Module System (READ-ONLY)
 ```
-modules/ directory is READ-ONLY — never edit files there
-Override module behavior via documented override mechanism only
-Install modules via insites-cli modules install <name>
+modules/ directory is READ-ONLY — never edit files there.
+Modules are preinstalled on each instance and updated via the Insites console
+(not via the CLI).
+Override module behavior at the app level (place a same-path file under app/
+and Insites will resolve to your file ahead of the module's).
 ```
 → `references/modules/`
 
 ### 5. Extract Reusable Code (DRY)
 ```
-When you write the same logic 2+ times, extract it into a reusable partial:
-- Repeated validation → lib/validations/presence.liquid
-- Repeated GraphQL execute → lib/commands/execute.liquid
-- Repeated UI blocks → shared/card.liquid, shared/pagination.liquid
-- Repeated auth checks → authorization_policies/ or lib/helpers/guard.liquid
-- Repeated data formatting → lib/helpers/format_price.liquid
-
+When you write the same logic 2+ times, extract it into a reusable partial.
 Use {% function %} for partials that return data.
 Use {% render %} for partials that produce HTML.
+Repeated access checks belong in a reusable authorization_policies file
+referenced from page front matter, not duplicated inline.
 ```
 → `references/partials/`
 
@@ -503,7 +491,6 @@ project-root/
 - Direct database access outside GraphQL
 - Deploying without running `insites-cli audit`
 - Syncing files outside `./app/`
-- Using Tailwind, Bootstrap, or custom CSS frameworks (use common-styling)
 - Hardcoding API keys or secrets (use `context.constants`)
 
 ## Documentation Links
