@@ -140,6 +140,25 @@ Need CMS operations?
 └─ Authorization Policies (page-gating rules)             → modules/cms/metadata.md (Authorization Policies)
 ```
 
+### "I need user-definable data tables (databases + items)"
+
+```
+Need data operations against user-defined databases?
+├─ Start here (overview, V2-first)                        → modules/data/README.md
+├─ Look up V2 REST endpoints, conventions, item schema    → modules/data/api.md
+├─ Worked HTTP examples (CRUD, pagination, schema lookup) → modules/data/patterns.md
+├─ API edges (URL prefix, PUT-not-PATCH, no UUIDs, etc.)  → modules/data/gotchas.md
+├─ Create / configure databases + columns in IIA          → modules/data/configuration.md
+│
+├─ Read database list / one database (read-only via API)  → modules/data/api.md (Databases)
+├─ CRUD database items                                    → modules/data/api.md (Database items)
+├─ Discover a database's column schema                    → modules/data/patterns.md (#1)
+├─ Bulk import — loop pattern (no native bulk endpoint)   → modules/data/patterns.md (#6)
+│
+├─ Auth (instance API key, no Bearer)                     → references/api/authentication.md
+└─ Webhooks — NONE on data module (audit-confirmed)
+```
+
 ### "I need business logic"
 
 ```
@@ -350,6 +369,7 @@ Use the decision trees above to identify which category applies, then load the m
 |----------|-----------|
 | CRM (insites_core) | `references/modules/crm/` |
 | CMS (insites_cms) | `references/modules/cms/` |
+| Data (insites_databases) | `references/modules/data/` |
 | Module Template | `references/modules/template/` |
 
 > Copy `references/modules/template/` to create documentation for new Insites modules. Each module gets its own directory with: README.md, api.md, configuration.md, patterns.md, gotchas.md, advanced.md.
