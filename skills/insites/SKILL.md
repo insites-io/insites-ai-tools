@@ -3,17 +3,6 @@ name: insites
 description: Consolidated skill for building on the Insites platform. Use decision trees below to find the right component, then load detailed references.
 ---
 
-## The skill leverages:
-- Correct use of Insites file structure
-- Deterministic project scaffolding
-- Safe data modeling and migrations
-- Liquid templating accuracy
-- Server-side logic (GraphQL, workflows, policies)
-- Repeatable deployment procedures
-- Minimal hallucination of unsupported features
-
----
-
 # Critical rules
 
 Follow these rules as written. Where they say "never" or "must", treat that literally — those constraints exist to prevent specific real failures (Liquid syntax errors, security holes, audit failures). Conventions described in plain prose elsewhere in this document are guidance, not absolutes; use judgement.
