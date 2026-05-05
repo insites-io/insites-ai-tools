@@ -69,7 +69,7 @@ Need a page or endpoint?
 ├─ JavaScript endpoint → pages/ (with .js.liquid extension)
 ├─ Form submission handler → pages/ (method: post) + forms/
 ├─ File download/redirect → pages/ + routing/
-├─ Admin-only page → pages/ + page front-matter `authorization_policies:`
+├─ Admin-only page → pages/ + authentication/ (page front-matter `authorization_policies:`)
 ├─ Layout wrapper → layouts/
 └─ Reusable UI component → partials/
 ```
@@ -176,11 +176,11 @@ Need business logic?
 ```
 Need auth?
 ├─ Get current user → authentication/ (context.current_user + GraphQL)
-├─ Check if user can do something → page front-matter `authorization_policies:` or inline check
-├─ Block unauthorized access (403) → page front-matter `authorization_policies:` (each policy is a Liquid file at `app/authorization_policies/<name>.liquid` returning truthy/falsy)
-├─ Redirect if not permitted → inline unless/redirect_to pattern, or the policy's own `redirect_to` front-matter key
+├─ Check if user can do something → authentication/ (authorization_policies + inline guard patterns)
+├─ Block unauthorized access (403) → authentication/ (page front-matter `authorization_policies:`)
+├─ Redirect if not permitted → authentication/ (inline unless/redirect_to, or a policy's own `redirect_to`)
 ├─ Sign in a user → authentication/ (sign_in tag)
-├─ Define custom access rules → write a new file at `app/authorization_policies/<name>.liquid`; reference it from page front matter
+├─ Define a custom authorization policy → authentication/ (file at `app/authorization_policies/<name>.liquid` referenced from page front matter)
 ├─ OAuth2/social login → authentication/
 ├─ CSRF protection → forms/ (authenticity_token)
 └─ Spam protection (reCAPTCHA/hCaptcha) → forms/ (spam_protection tag)
