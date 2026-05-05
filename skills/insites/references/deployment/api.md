@@ -169,10 +169,10 @@ insites-cli migrations generate production rollback_feature
 
 ### Run Tests on Staging
 
-Required before production:
+Required before production. **A CLI test runner is not yet shipped** — until it does, run tests in-browser:
 
-```bash
-insites-cli test run staging
+```
+<staging-instance>/_tests/run
 ```
 
 ### Verify Schema Changes
@@ -200,7 +200,9 @@ insites-cli deploy production
 
 ```bash
 insites-cli audit
-insites-cli test run staging
+# Test step pending — CLI test runner not yet shipped.
+# Until it lands, gate on a manual or browser-driven test pass at
+# <staging-instance>/_tests/run before continuing.
 insites-cli deploy production
 ```
 

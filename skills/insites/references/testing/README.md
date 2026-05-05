@@ -68,17 +68,17 @@ Every test must initialize a contract, pass it through assertions, and return it
 
 ## Running Tests
 
-### CLI
-```bash
-# Run all tests
-insites-cli test run staging
-
-# Run a specific test
-insites-cli test run staging -n test/products/create_test
-```
+> **Status note:** The CLI test runner (`insites-cli test run`) is **not yet shipped**. Use the browser endpoints below until it lands.
 
 ### Browser
 Navigate to `/_tests/run` on your staging instance.
+
+| Endpoint | Purpose |
+|---|---|
+| `/_tests` | List all available test files |
+| `/_tests/run` | Execute all tests (HTML output) |
+| `/_tests/run.js` | Execute all tests (JSON output) |
+| `/_tests/run?name=test/products/create_test` | Run a specific test |
 
 ## Test Organization
 

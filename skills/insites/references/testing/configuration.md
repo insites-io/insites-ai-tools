@@ -99,17 +99,9 @@ Tests can only run on:
 insites-cli deploy staging
 ```
 
-### Run All Tests
+### Running Tests
 
-```bash
-insites-cli test run staging
-```
-
-### Run Specific Test
-
-```bash
-insites-cli test run staging -n test/commands/users/create_test
-```
+> **Status note:** A CLI test runner (`insites-cli test run`) is not yet shipped. Use the browser endpoints below.
 
 ### Browser Access
 

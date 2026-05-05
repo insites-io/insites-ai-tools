@@ -60,9 +60,7 @@ insites-cli data clean dev                      # Clean all data (DANGEROUS)
 ```
 
 ### Testing
-```bash
-insites-cli test run staging                    # Run all tests
-```
+> A CLI test runner (`insites-cli test run`) is not yet shipped. Until it lands, run tests in-browser at `<your-instance>/_tests/run` after deploy. See [`../testing/api.md`](../testing/api.md) for the test-execution endpoints and the assertion API.
 
 ## Linting (insites-cli audit)
 

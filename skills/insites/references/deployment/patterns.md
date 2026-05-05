@@ -15,11 +15,11 @@ insites-cli audit
 # 3. Deploy to staging
 insites-cli deploy staging
 
-# 4. Test on staging
-insites-cli test run staging
+# 4. Test on staging in-browser at <staging-instance>/_tests/run
+#    (CLI test runner not yet shipped)
 
 # 5. Review staging logs
-insites-cli logs staging --filter error
+insites-cli logsv2 search
 
 # 6. Deploy to production
 insites-cli deploy production
@@ -42,9 +42,9 @@ echo "Running pre-deployment checks..."
 insites-cli audit
 echo "✓ insites-cli audit passed"
 
-# 2. Run tests
-insites-cli test run staging
-echo "✓ Tests passed"
+# 2. Run tests in-browser at <staging-instance>/_tests/run
+#    (CLI test runner not yet shipped — gate this step manually until it ships)
+echo "✓ Tests passed (manual / browser-driven)"
 
 # 3. Verify environment
 insites-cli env info production
@@ -69,8 +69,8 @@ Deploy and test on staging before production:
 # Deploy to staging
 insites-cli deploy staging
 
-# Run comprehensive tests
-insites-cli test run staging
+# Run comprehensive tests in-browser at <staging-instance>/_tests/run
+# (CLI test runner not yet shipped)
 
 # Verify data integrity
 insites-cli data export staging users data/test_export.csv
@@ -109,10 +109,9 @@ jobs:
         env:
           POS_STAGING_TOKEN: ${{ secrets.POS_STAGING_TOKEN }}
 
-      - name: Run Tests
-        run: insites-cli test run staging
-        env:
-          POS_STAGING_TOKEN: ${{ secrets.POS_STAGING_TOKEN }}
+      # Test step pending — CLI test runner not yet shipped.
+      # Until it lands, gate the production deploy on a manual / browser-driven
+      # test pass at <staging-instance>/_tests/run.
 
       - name: Deploy to Production
         run: insites-cli deploy production

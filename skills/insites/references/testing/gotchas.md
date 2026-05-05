@@ -36,7 +36,7 @@
 
 ## Test File Not Found
 
-**Symptom:** `insites-cli test run` finds no tests.
+**Symptom:** `/_tests/run` returns no tests.
 
 **Causes:**
 - File not in `app/lib/test/` directory
@@ -58,15 +58,7 @@ insites-cli deploy staging
 
 ## Tests Not Running in Production
 
-**This is by design.** Tests can only run on development and staging environments.
-
-```bash
-# WRONG
-insites-cli test run production
-
-# CORRECT
-insites-cli test run staging
-```
+**This is by design.** Tests can only run on development and staging environments. Hitting `/_tests/run` against a production instance is rejected by the platform.
 
 ## Object Property Access on Nil
 
@@ -88,21 +80,17 @@ insites-cli test run staging
 
 **Symptom:** Tests pass but code changes aren't reflected.
 
-**Fix:** Always deploy before running tests:
+**Fix:** Always deploy (or sync) before running tests:
 
 ```bash
 insites-cli deploy staging
-insites-cli test run staging
+# then visit <staging-instance>/_tests/run
 ```
 
-Or use sync mode for active development:
+For active development, use sync mode in one terminal and refresh `/_tests/run?name=test/your_test` in the browser as you make changes:
 
 ```bash
-# Terminal 1
 insites-cli sync staging
-
-# Terminal 2
-insites-cli test run staging -n test/your_test
 ```
 
 ## Tests Pass Locally but Fail in CI

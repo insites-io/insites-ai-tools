@@ -215,21 +215,19 @@ properties:
 
 ### Tests Fail on Staging
 
-**Issue**: `insites-cli test run staging` fails
+**Issue**: A test fails when running `<staging-instance>/_tests/run`. (A CLI test runner is not yet shipped — tests run in-browser today.)
 
-**Impact**: Production deployment blocked
+**Impact**: Production deployment blocked.
 
 **Solution**:
 ```bash
-# Run tests locally first
-insites-cli test run dev
+# Run tests against dev first by hitting <dev-instance>/_tests/run
 
 # Check test file syntax
 cat app/lib/test/user_test.liquid
 
-# Fix failing tests before deploy
-# Rerun tests
-insites-cli test run staging
+# Fix failing tests, redeploy, rerun in-browser:
+#   <staging-instance>/_tests/run?name=test/your_test
 ```
 
 ## Deployment Rollback

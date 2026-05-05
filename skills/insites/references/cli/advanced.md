@@ -21,16 +21,13 @@ insites-cli audit || exit 1
 # Deploy
 insites-cli deploy $ENV
 
-# Run tests
-echo "Testing deployment..."
-insites-cli test run $ENV || exit 1
+# Test step — CLI test runner not yet shipped. Until it lands, gate on a
+# manual or browser-driven check at <$ENV-instance>/_tests/run.
+echo "Run tests in-browser at <${ENV}-instance>/_tests/run before continuing."
 
-# Check for errors
+# Check for errors via logsv2 search subcommand
 echo "Checking logs for errors..."
-ERRORS=$(insites-cli logsv2 $ENV --filter "error" | wc -l)
-if [ $ERRORS -gt 0 ]; then
-  echo "Warning: Found error logs"
-fi
+insites-cli logsv2 search
 
 echo "Deployment completed successfully"
 ```
@@ -215,7 +212,6 @@ Enable detailed logging:
 
 ```bash
 insites-cli deploy dev --verbose
-insites-cli test run staging --verbose
 ```
 
 ### Dry Run Deployments

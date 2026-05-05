@@ -134,28 +134,27 @@
 
 ### Pre-Deployment Testing Workflow
 
+> **Status note:** A CLI test runner is not yet shipped. The CI patterns below are aspirational; for now run tests in-browser via `/_tests/run` against the staging instance after deploy.
+
 ```bash
 # 1. Deploy to staging
 insites-cli deploy staging
 
-# 2. Run all tests
-insites-cli test run staging
+# 2. Run tests in-browser at <staging-instance>/_tests/run
+#    (when the CLI runner ships, an automated step will replace this)
 
 # 3. If all pass, deploy to production
 insites-cli deploy production
 ```
 
-### GitHub Actions
+### GitHub Actions (when CLI runner ships)
+
+The integration below is the intended shape once `insites-cli test run` is available. Until then, gate on a manual / browser-driven test pass.
 
 ```yaml
-- name: Run Tests
-  run: |
-    insites-cli deploy staging
-    insites-cli test run staging
-    if [ $? -ne 0 ]; then
-      echo "Tests failed"
-      exit 1
-    fi
+- name: Deploy to staging
+  run: insites-cli deploy staging
+# Test step — placeholder until the CLI runner is shipped.
 ```
 
 ## Real-Time Development Pattern
@@ -165,10 +164,10 @@ insites-cli deploy production
 insites-cli sync staging
 
 # Terminal 2: Watch logs
-insites-cli logsv2 staging
+insites-cli logsv2 search
 
-# Terminal 3: Run tests as needed
-insites-cli test run staging -n test/commands/contacts/create_test
+# Terminal 3 / Browser: Refresh /_tests/run?name=test/commands/contacts/create_test
+# (CLI test runner not yet shipped — until then run tests in-browser)
 ```
 
 ## See Also

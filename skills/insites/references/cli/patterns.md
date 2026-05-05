@@ -42,29 +42,32 @@ Checks performed:
 
 ### Staging Tests
 
-Execute tests on staging:
+Run tests in-browser against staging (CLI runner not yet shipped):
+
+```
+<staging-instance>/_tests/run
+```
+
+Watch for errors during the test run via:
 
 ```bash
-insites-cli test run staging
-insites-cli logsv2 staging --filter error
+insites-cli logsv2 search
 ```
 
 ## Environment Promotion Pipeline
 
 ### Dev → Staging → Production
 
-1. Deploy to development and test:
+1. Deploy to development and run tests in-browser at `<dev-instance>/_tests/run`:
 
 ```bash
 insites-cli deploy dev
-insites-cli test run dev
 ```
 
-2. Deploy to staging for QA:
+2. Deploy to staging for QA — run tests in-browser at `<staging-instance>/_tests/run`:
 
 ```bash
 insites-cli deploy staging
-insites-cli test run staging
 ```
 
 3. Deploy to production:
@@ -152,8 +155,9 @@ insites-cli data clean staging test_records
 ENV=$1
 insites-cli audit
 insites-cli deploy $ENV
-insites-cli test run $ENV
-insites-cli logsv2 $ENV --filter error
+# Test step pending — CLI test runner not yet shipped.
+# Until then run tests in-browser at <$ENV-instance>/_tests/run after deploy.
+insites-cli logsv2 search
 ```
 
 ## See Also

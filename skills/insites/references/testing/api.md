@@ -2,21 +2,7 @@
 
 ## Test Execution
 
-### CLI Test Execution
-
-```bash
-# Run all tests
-insites-cli test run <environment>
-insites-cli test run staging
-
-# Run a specific test
-insites-cli test run <environment> -n <test-name>
-insites-cli test run staging -n test/commands/contacts/create_test
-```
-
-Exit codes:
-- `0` = All tests passed
-- Non-zero = Test failures occurred
+> **Status note:** A CLI test runner (`insites-cli test run`) is **not yet shipped**. Tests are written as `_test.liquid` files using the Contract & Assertion API documented below, and executed today via the **browser-based endpoints**. When the CLI runner ships, this section will be expanded; for now use the browser endpoints.
 
 ### Browser-Based Testing
 

@@ -3,7 +3,7 @@
 ## Pre-Deployment Checklist
 
 1. Run `insites-cli audit` — must pass with 0 errors
-2. Run tests: `insites-cli test run staging`
+2. Run tests in-browser at `<staging-instance>/_tests/run` (CLI test runner not yet shipped)
 3. Verify all changes work on staging
 4. Review any pending migrations
 
@@ -65,8 +65,8 @@ insites-cli audit
 # 3. Deploy to staging
 insites-cli deploy staging
 
-# 4. Run tests
-insites-cli test run staging
+# 4. Run tests in-browser at <staging-instance>/_tests/run
+#    (CLI test runner not yet shipped — gate manually until it ships)
 
 # 5. Deploy to production (if tests pass)
 insites-cli deploy production

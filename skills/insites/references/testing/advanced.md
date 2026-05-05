@@ -86,9 +86,9 @@ When built-in assertions are insufficient, use `register_error` to add custom va
 
 ### Step-by-step protocol
 
-1. Run the specific failing test:
-   ```bash
-   insites-cli test run staging -n test/commands/users/create_test
+1. Run the specific failing test in-browser (CLI runner not yet shipped):
+   ```
+   /_tests/run?name=test/commands/users/create_test
    ```
 
 2. Check JSON output for assertion details:
