@@ -7,7 +7,7 @@ The Insites Data module (POS name `insites_databases`) provides user-definable d
 | If you're… | Read |
 |---|---|
 | Building an external app that reads/writes database items | [`api.md`](api.md) |
-| Calling these endpoints from inside Liquid | [`api.md`](api.md) + [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) (when written) |
+| Calling these endpoints from inside Liquid | [`api.md`](api.md) + [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) |
 | Creating or configuring databases (column schema, etc.) in IIA | [`configuration.md`](configuration.md) |
 | Looking for HTTP examples of common flows | [`patterns.md`](patterns.md) |
 | Hitting an edge or unexpected behavior | [`gotchas.md`](gotchas.md) |

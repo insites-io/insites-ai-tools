@@ -1,6 +1,6 @@
 # CRM — Patterns
 
-Worked examples for the most common multi-step flows against the CRM V2 REST API. **HTTP examples only.** For in-Liquid use, see [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) (when written) — the same operations are reachable from inside Insites without an HTTP round-trip.
+Worked examples for the most common multi-step flows against the CRM V2 REST API. **HTTP examples only.** For in-Liquid use, see [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) — the same operations are reachable from inside Insites without an HTTP round-trip.
 
 For conventions (auth, response shape, dotted-path nested references, list envelope), see [`api.md`](api.md). Auth header is `Authorization: instance_<token>` — no `Bearer` prefix — and is omitted from the snippets below for brevity.
 

@@ -8,7 +8,7 @@ The Insites CRM module manages contacts, companies, and the work attached to the
 |---|---|
 | Looking up the field shape of a CRM resource (types, required, IIA columns) | [`schema.md`](schema.md) |
 | Building an external app that calls the CRM API | [`api.md`](api.md) |
-| Calling these endpoints from inside an Insites Liquid app | [`api.md`](api.md) + [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) (when written) |
+| Calling these endpoints from inside an Insites Liquid app | [`api.md`](api.md) + [`../../api/calling-from-liquid.md`](../../api/calling-from-liquid.md) |
 | Looking up the IIA admin paths to configure custom fields, system fields, webhooks | [`configuration.md`](configuration.md) |
 | Working with cross-module-shared resources (tasks, activities, attachments, event streams) | [`globals/`](globals/) |
 | Looking for examples of common multi-step flows | [`patterns.md`](patterns.md) |
