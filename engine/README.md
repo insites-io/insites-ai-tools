@@ -57,6 +57,6 @@ engine/
 
 ## Corpus
 
-The corpus (rules, decisions, templates, validators) lives in `../logic-engine/` (the sibling directory of this package, both inside `insites-ai-tool`). The package bundles the corpus at build time so consumers don't need network access.
+The corpus (rules, decisions, templates, validators) lives in `../logic-engine/` (the sibling directory of this package, both inside the `insites-logic-engine` repository). The package bundles the corpus at build time so consumers don't need network access.
 
 See `../logic-engine/README.md` for corpus authoring rules.
