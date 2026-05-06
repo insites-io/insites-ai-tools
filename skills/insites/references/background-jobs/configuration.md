@@ -146,5 +146,4 @@ Failed jobs after max retries generate log entries visible in `insites-cli logs`
 - [Background Jobs - Patterns](./patterns.md)
 - [Background Jobs - Gotchas](./gotchas.md)
 - [Background Jobs - Advanced](./advanced.md)
-- [insites-cli logs Documentation](../../commands/logs.md)
-- [Events & Consumers](../../events-consumers/index.md)
+- [insites-cli Documentation](../cli/api.md)

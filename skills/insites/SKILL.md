@@ -59,9 +59,9 @@ Need data operations?
 ├─ Define a data model/table → schema/
 ├─ Query records (list/search/filter) → graphql/ (records query)
 ├─ Query single record by ID → graphql/ (records query with id filter)
-├─ Create a record → graphql/ (record_create mutation) + commands/
-├─ Update a record → graphql/ (record_update mutation) + commands/
-├─ Delete a record → graphql/ (record_delete mutation) + commands/
+├─ Create a record → graphql/ (record_create mutation), called from forms/ callback_actions
+├─ Update a record → graphql/ (record_update mutation), called from forms/ callback_actions
+├─ Delete a record → graphql/ (record_delete mutation), called from forms/ callback_actions
 ├─ Related records (belongs-to/has-many) → graphql/ (related_record/related_records)
 ├─ Paginate results → graphql/ (page/per_page args)
 ├─ Upload files → schema/ (upload type) + forms/
@@ -141,12 +141,11 @@ Need data operations against user-defined databases?
 
 ```
 Need business logic?
-├─ Encapsulate a create/update/delete operation → commands/ (build → check → execute)
-├─ Validate user input → commands/ (check stage with validators)
-├─ React to something that happened → events-consumers/
+├─ Encapsulate a create/update/delete operation → forms/ (callback_actions block)
+├─ Validate user input → forms/ (YAML `validation:` blocks for fields; cross-field checks in callback_actions)
 ├─ Run code asynchronously → background-jobs/
 ├─ Run code on a schedule → background-jobs/ (with delay)
-└─ Send email after an action → events-consumers/ + emails-sms/
+└─ Send email after an action → forms/ (callback_actions invoke email partial) + emails-sms/
 ```
 
 ### "I need authentication & authorization"
@@ -217,8 +216,8 @@ Need Liquid help?
 Need forms?
 ├─ HTML form with CSRF → forms/ (use <form> tag, NOT {% form %})
 ├─ File upload → forms/ (upload field type) + modules/cms/metadata.md (Web Files / Attachments)
-├─ Form validation → commands/ (check stage)
-├─ Display validation errors → partials/ (render errors from command result)
+├─ Form validation → forms/ (YAML `validation:` blocks; cross-field checks in callback_actions)
+├─ Display validation errors → partials/ (render errors from form result)
 ├─ Multi-step form → pages/ + sessions/
 ├─ AJAX form submission → forms/ + pages/ (.json.liquid endpoint)
 └─ Spam protection → forms/ (spam_protection tag)
@@ -231,7 +230,7 @@ Need notifications?
 ├─ Send email → emails-sms/ (email templates)
 ├─ Send SMS → emails-sms/ (SMS templates)
 ├─ Flash messages/toasts → flash-messages/
-├─ Send async (after action) → events-consumers/ + emails-sms/
+├─ Send async (after action) → background-jobs/ + emails-sms/
 └─ Email layout/styling → layouts/ (mailer layout)
 ```
 
@@ -305,8 +304,7 @@ Use the decision trees above to identify which category applies, then load the m
 ### Business Logic
 | Category | Reference |
 |----------|-----------|
-| Commands | `references/commands/` |
-| Events & Consumers | `references/events-consumers/` |
+| Forms (state-changing logic via `callback_actions`) | `references/forms/` |
 | Background Jobs | `references/background-jobs/` |
 
 ### Liquid Templating
@@ -372,9 +370,9 @@ Page files fetch data via `{% graphql %}` and delegate rendering to partials via
 Partials never call `{% graphql %}`. Pages own data fetching; partials receive their data through render arguments.
 → `references/graphql/`
 
-### 3. Command pattern (build → check → execute)
-All create/update/delete operations go through commands. Commands follow the inline build → check → execute pattern, and validation errors are returned (not thrown).
-→ `references/commands/`
+### 3. State changes live in form `callback_actions`
+Create/update/delete operations are driven by forms. Each `forms/<name>.liquid` declares its YAML schema (fields, validation) and a Liquid `callback_actions` block that runs the GraphQL mutations and side effects when the form is submitted. There is no separate `app/lib/commands/` directory in canonical Combinate.
+→ `references/forms/`
 
 ### 4. Modules are read-only
 Don't edit files under `modules/` — that tree is replaced wholesale on every module update, so changes are lost. Modules are preinstalled per instance and updated through the Insites console, not the CLI. To override module behavior, place a same-path file under your `app/` tree; Insites resolves your file ahead of the module's.

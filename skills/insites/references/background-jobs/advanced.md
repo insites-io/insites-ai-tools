@@ -393,6 +393,5 @@ If pattern detected, investigate and fix.
 - [Background Jobs - API](./api.md)
 - [Background Jobs - Patterns](./patterns.md)
 - [Background Jobs - Gotchas](./gotchas.md)
-- [insites-cli Reference](../../commands/insites-cli.md)
-- [Events & Consumers](../../events-consumers/index.md)
+- [insites-cli Reference](../cli/api.md)
 - [Liquid Filters](../../liquid/filters/index.md)

@@ -37,7 +37,7 @@ Wrap a GraphQL call location in a query partial so the actual graphql tag stays 
 
 ## Command Partial Pattern
 
-See [Commands](../commands/README.md) for the full build/check/execute pattern.
+> **Note:** the older "command partial" pattern (build → check → execute under `lib/commands/`) is **not used in canonical Combinate**. State-changing logic lives in `forms/<name>.liquid` `callback_actions` blocks. See [Forms](../forms/README.md). The example below is retained only as a reference for legacy partial-as-function patterns; do not generate code at `lib/commands/` paths.
 
 ```liquid
 {% comment %} app/views/partials/lib/commands/products/create.liquid {% endcomment %}
@@ -277,4 +277,4 @@ authorization_policies:
 - [Partials Overview](README.md)
 - [api.md](api.md) — tag reference
 - [gotchas.md](gotchas.md) — common errors
-- [Commands](../commands/README.md) — command partial pattern
+- [Forms](../forms/README.md) — state-changing logic via `callback_actions` (canonical replacement for the older command pattern)

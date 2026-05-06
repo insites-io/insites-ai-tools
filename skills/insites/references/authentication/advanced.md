@@ -358,4 +358,4 @@ This pattern involves forms, emails, and auth working together. See [Emails-SMS 
 - [Authentication Patterns](patterns.md) -- standard login and guard workflows
 - [Authentication Gotchas](gotchas.md) -- common errors and limits
 - [Emails-SMS Reference](../emails-sms/README.md) -- sending password reset emails
-- [Events-Consumers Reference](../events-consumers/README.md) -- async processing
+- [Background Jobs Reference](../background-jobs/README.md) -- async processing

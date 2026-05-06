@@ -309,4 +309,4 @@ The form partial includes CSRF token and submits to the POST endpoint.
 - [Pages API](api.md) -- tags and filters available in pages
 - [Pages Gotchas](gotchas.md) -- common errors and limits
 - [Partials Patterns](../partials/patterns.md) -- patterns for the partials pages delegate to
-- [Commands Reference](../commands/README.md) -- the command pattern used in create/update
+- [Forms Reference](../forms/README.md) -- `callback_actions` blocks handle create/update/delete (canonical replacement for the older command pattern)
