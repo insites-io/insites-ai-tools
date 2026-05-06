@@ -165,15 +165,7 @@ For data changes, create new migrations:
 insites-cli migrations generate production rollback_feature
 ```
 
-## Pre-Deployment Testing
-
-### Run Tests on Staging
-
-Required before production:
-
-```bash
-insites-cli test run staging
-```
+## Pre-Deployment
 
 ### Verify Schema Changes
 
@@ -187,20 +179,10 @@ insites-cli data export staging users data/verify.csv
 
 ## Continuous Integration Deployment
 
-### Automated Deployment Trigger
-
-CI/CD pipeline integration:
-
-```bash
-# On successful tests
-insites-cli deploy production
-```
-
 ### Deployment Validation in CI
 
 ```bash
 insites-cli audit
-insites-cli test run staging
 insites-cli deploy production
 ```
 

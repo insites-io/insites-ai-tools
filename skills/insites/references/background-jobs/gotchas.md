@@ -300,5 +300,5 @@ Is job executing?
 - [Background Jobs - API](./api.md)
 - [Background Jobs - Patterns](./patterns.md)
 - [Background Jobs - Advanced](./advanced.md)
-- [insites-cli Troubleshooting](../../commands/troubleshooting.md)
-- [Liquid Scope and Variables](../../liquid/variables.md)
+- [insites-cli Reference](../cli/api.md)
+- [Liquid Scope and Variables](../liquid/variables/README.md)

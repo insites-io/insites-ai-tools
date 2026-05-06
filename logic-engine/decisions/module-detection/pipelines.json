@@ -1,0 +1,19 @@
+{
+  "id": "module-detection-pipelines",
+  "module": "pipelines",
+  "label": "Pipelines",
+  "when": {
+    "any": [
+      {
+        "signal": "has_multi_step_funnel"
+      },
+      {
+        "signal": "has_lead_capture_followup"
+      }
+    ]
+  },
+  "rationale": "Multi-stage flows (lead \u2192 qualified \u2192 won) where leads need follow-up over days.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -1,155 +1,148 @@
-# Insites Skill for OpenCode and Claude Code
+# Insites Logic Engine
 
-Comprehensive Insites platform reference docs for AI/LLM consumption. Covers Directory structure, Modules, Pages, insites-cli, Liquid, Graphql, etc.
+Source-controlled rules, decisions, templates, and reference docs that drive AI/LLM tooling for the Insites platform. The repository ships **two complementary deliverables**:
 
-## Install insites skill
+1. **`skills/insites/`** — markdown reference docs consumed as context by Claude Code, OpenCode, Cursor, and any other LLM-aware editor that loads skills.
+2. **`engine/` + `logic-engine/`** — a TypeScript npm package (`@insites/logic-engine`) that loads the rule/decision corpus at runtime, used by Insites Studio, MCP servers, and IDE plugins for deterministic checks.
+
+Both consume the same audit-grounded rules so the guidance LLMs receive matches what programmatic tooling enforces.
+
+## Install the Insites skill
+
+### For Claude Code
+
+```bash
+# Local (current project only)
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/claude-install.sh | bash
+
+# Global (available in all projects)
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/claude-install.sh | bash -s -- --global
+```
 
 ### For OpenCode
 
-Local installation (current project only):
+```bash
+# Local
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install.sh | bash
+
+# Global
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install.sh | bash -s -- --global
+```
+
+## Install example skills
+
+Example skills include: `code-review`, `playwright-cli`, `pos-auth`, `pos-crud-generator`, `pos-unit-tests`, `project-init`, and others.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install.sh | bash
-```
+# Claude Code (local / global)
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --claude
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --claude --global
 
-Global installation (available in all projects):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install.sh | bash -s -- --global
-```
-
-### For Claude Code
-
-Local installation (current project only):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/claude-install.sh | bash
-```
-
-Global installation (available in all projects):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/claude-install.sh | bash -s -- --global
-```
-
-## Install Example Skills                                                                                                                                                                   
-               
-Example skills include: code-review, playwright-cli, pos-auth, pos-crud-generator, pos-unit-tests, project-init, and more.                                                                  
-                                                                                                                                                                                              
-### For OpenCode                                                                                                                                                                            
-                                  
-Local installation:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --opencode
-```
-
-Global installation:
-
-```
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --opencode --global
-```
-  
-### For Claude Code
-
-Local installation:
-
-```
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --claude
-```
-  
-Global installation:
-
-```
-curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --claude --global
+# OpenCode (local / global)
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --opencode
+curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --opencode --global
 ```
 
 ## Usage
 
-Once installed, the skill appears in OpenCode's `<available_skills>` list. The agent loads it automatically when working on Insites tasks.
-
-Use the `/insites` command to load the skill and get contextual guidance:
+Once installed, the skill appears in your editor's available skills and loads automatically when working on Insites tasks. You can also invoke it explicitly:
 
 ```
 /insites initialize new project directory structure
 ```
 
-### Updating
-
-To update to the latest version:
+To update the installed skill to the latest version:
 
 ```
 /insites --update-skill
 ```
 
-## Structure
-
-The installer adds both a skill and a command:
+## Repository layout
 
 ```
-# Skill (reference docs)
-skills/insites/
-├── SKILL.md              # Main manifest + decision trees
-└── references/           # Product subdirectories
-    └── <product>/
-        ├── README.md         # Overview, when to use
-        ├── api.md            # Runtime API reference
-        ├── configuration.md  # wrangler.toml + bindings
-        ├── patterns.md       # Usage patterns
-        └── gotchas.md        # Pitfalls, limitations
-
-# Command (slash command)
-command/insites.md     # /insites entrypoint
+.
+├── README.md                  this file
+├── LICENSE                    MIT
+├── CHANGELOG.md
+├── install.sh                 installer for OpenCode
+├── claude-install.sh          installer for Claude Code
+├── install-examples.sh        installs example skills
+├── command/                   slash-command definition (/insites)
+├── skills/insites/            the skill consumed by LLMs
+│   ├── SKILL.md               main manifest + decision trees
+│   └── references/            domain reference docs (per category)
+├── skills_examples/           optional secondary skills
+├── engine/                    TypeScript npm package: @insites/logic-engine
+└── logic-engine/              the rule/decision/template corpus
 ```
 
-## Add Insites documentation MCP
+### `skills/insites/`
 
-To obtain CF-Access-Client-Id and CF-Access-Client-Secret tokens, please contact support@insites.io. Once you have them, follow the instructions depending on the tool you use.
-
-### OpenCode
-
-Configure in `opencode.json`
+The skill is organised by **domain category**, not by source-file directory. Each category lives at `skills/insites/references/<category>/` and ships the same six-file shape:
 
 ```
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "docs": {
-      "type": "remote",
-      "url": "https://librarian.platformos.dev",
-      "headers": {
-        "CF-Access-Client-Id": "***",
-        "CF-Access-Client-Secret": "***"
-      },
-      "enabled": true
-    }
-  }
-}
+references/<category>/
+├── README.md          overview, when to use
+├── api.md             tags, filters, GraphQL operations relevant to the category
+├── configuration.md   YAML / front-matter / install-time settings
+├── patterns.md        worked examples
+├── gotchas.md         pitfalls, error conditions, quirks
+└── advanced.md        edge cases, optimisation, multi-step flows
 ```
 
-### ClaudeCode
+Categories currently covered (see `SKILL.md` for the full index):
 
-`claude mcp add --transport http insites-librarian https://librarian.platformos.dev --header "CF-Access-Client-Id: ***.access" --header "CF-Access-Client-Secret: ***"`
+- **Views & Routing** — `pages/`, `partials/`, `layouts/`, `routing/`
+- **Data & Storage** — `schema/`, `graphql/`, `migrations/`
+- **Business Logic** — `forms/` (state changes via `callback_actions`), `background-jobs/`
+- **Liquid Templating** — `liquid/{tags,filters,objects,types,variables,flow-control,loops}/`
+- **Authentication & Security** — `authentication/`, `forms/`
+- **Notifications** — `emails-sms/`, `flash-messages/`
+- **Modules** — `modules/{crm,cms,data,template}/` plus a project-level [`project-structure.md`](skills/insites/references/project-structure.md)
+- **Configuration & Infrastructure** — `constants/`, `configuration/`, `assets/`, `sessions/`, `caching/`
+- **External Integrations** — `api-calls/` (outbound HTTP), `api-endpoints/` (inbound JSON), `crm-controllers/`, `user-profile-types/`, `payments/`
+- **Developer Tools** — `cli/`, `deployment/`
+
+### `engine/` — `@insites/logic-engine` npm package
+
+A TypeScript library that loads and evaluates the corpus. Source under `engine/src/`:
+
+| File | Role |
+|---|---|
+| `corpus.ts` | Loads `logic-engine/` (rules, decisions, templates) into memory |
+| `dsl.ts` | Parses the JSON `when`/`then` decision DSL |
+| `runtime.ts` | Evaluates decisions against a project's tree |
+| `validators.ts` | Zod schemas for the corpus (discriminated unions for decision kinds) |
+| `render.ts` | Renders Eta templates from scaffold decisions |
+| `cli.ts` | `npx insites-logic-engine` entry point |
+| `mcp-server.ts` | MCP-server entry — exposes the engine to MCP-aware clients |
+| `index.ts` | Public exports for npm consumers |
+
+Build, test, lint:
+
+```bash
+cd engine
+npm install
+npm run build
+npm test          # vitest run
+npm run lint      # biome check
 ```
 
-### Decision Trees
+The `prepack` script copies `logic-engine/` into the package before publishing so the npm bundle ships with the corpus baked in.
 
-- Rendering or UI request
-- Data persistence or schema request
-- Data retrieval or display request
-- Create / Update / Delete request
-- Automation or background behavior request
-- Security or access control request
-- External system or integration request
-- Client-side interactivity request
-- Shared logic or utilities request
-- Deployment or operational request
-- Localization or multi-language request
+### `logic-engine/` — the corpus
 
-## Resources Covered
+| Subdirectory | Contents |
+|---|---|
+| `rules/` | Markdown constraint files (pages, partials, graphql, schema, authorization, forms, modules, liquid-syntax, commands) plus `index.json` registry. Loaded into LLM prompts. |
+| `decisions/` | JSON `when`/`then` DSL files in three categories: `module-detection/`, `feature-pattern/`, `scaffold/`. Code-evaluated. |
+| `templates/` | Eta file skeletons rendered into projects by scaffold decisions. |
+| `audit/` | Cross-repo grounding evidence for v0 corpus rules (R-1 through R-25). The audit drives the `skills/insites/` rewrite cadence. |
 
-Liquid Templating & Filters, Pages & Routing, Layouts, Graphql Queries & Mutations, Partials/Includes, Insites modules, Tags & Control flow, CLI & Deployment, Policies, Integrations, and many more.
+## Versioning & releases
+
+Active branch: `release/v1.1.0`. The v1.1.0 release rewrote the skill against canonical Combinate codebases (`app-portal`, `app-seedling`) — corrected the project layout to modules-based, replaced the legacy command-pattern guidance with form `callback_actions`, calibrated the strict Pages/Partials rules against real practice, and tightened the authorization-policy `true`/`false` output invariant. See `CHANGELOG.md` for the full list and `logic-engine/audit/v0-conflicts.md` for the rule-by-rule grounding.
 
 ## License
 
-MIT - see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE).

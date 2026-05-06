@@ -477,15 +477,7 @@ Grand total: {{ grand_total }}
 
 ## See Also
 
-- [transaction Tag Reference](/liquid/tags/transaction)
-- [try/catch Tag Reference](/liquid/tags/try-catch)
-- [rollback Tag Reference](/liquid/tags/rollback)
-- [cache Tag Reference](/liquid/tags/cache)
-- [function Tag Reference](/liquid/tags/function)
-- [export Tag Reference](/liquid/tags/export)
-- [content_for Tag Reference](/liquid/tags/content-for)
-- [response_headers Tag Reference](/liquid/tags/response-headers)
-- [print Tag Reference](/liquid/tags/print)
-- [background Tag Reference](/liquid/tags/background)
-- [Gotchas & Troubleshooting](/liquid/tags/gotchas)
-- [Liquid Tag Overview](/liquid/tags)
+- [Liquid Tags — overview](README.md)
+- [Liquid Tags — API reference](api.md) (covers `transaction`, `try`/`catch`, `rollback`, `cache`, `function`, `export`, `content_for`, `response_headers`, `print`, `background`, etc.)
+- [Liquid Tags — patterns](patterns.md)
+- [Liquid Tags — gotchas](gotchas.md)

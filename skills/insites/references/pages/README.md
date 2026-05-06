@@ -1,8 +1,20 @@
 # Pages (Controllers)
 
-Pages in Insites act as **controllers**. They live in `app/views/pages/`, fetch data via `{% graphql %}`, and delegate all rendering to partials via `{% render %}`. Pages never contain HTML, JS, or CSS directly.
+Pages in Insites act primarily as **controllers**. They live in `modules/<name>/public/views/pages/`, fetch data via `{% graphql %}`, and delegate the bulk of rendering to partials via `{% render %}`.
 
-> **Module path:** When building a module, use `modules/<module_name>/public/views/pages/` for pages accessible as routes, or `modules/<module_name>/private/views/pages/` for pages only used internally by the module.
+> **Module path:** Pages live at `modules/<module_name>/public/views/pages/`. Insites projects organise code by module (see [`references/project-structure.md`](../project-structure.md)); there is no flat top-level `app/views/pages/` directory in canonical Combinate.
+
+## Inline HTML — when it's allowed
+
+The strict rule "pages never contain HTML, JS, or CSS" reflects an *ideal* — not what real Combinate codebases enforce. Reading the canonical reference repos (`app-portal`, `app-seedling`), pages routinely contain small amounts of inline HTML where extracting a partial would be more friction than payoff:
+
+- **Tiny page-specific markup** — a single wrapper `<div>`, a `<title>` set, or a one-off heading that no other page reuses.
+- **JSON pages (`.json.liquid`)** — frequently inline their entire JSON body since there is nothing to delegate.
+- **Redirect/error pages** — short flow-control pages whose entire body is a status code + a one-line message.
+
+The hard rule is the **opposite**: anything that could plausibly be reused — a card, a list item, a form section, a navigation block — belongs in a partial. The `{% render %}` boundary exists so that markup is shareable, not because every page must be a pure controller.
+
+If you find yourself writing more than ~10 lines of HTML in a page, that's the signal to extract a partial.
 
 ## Key Purpose
 
@@ -65,7 +77,7 @@ authorization_policies:
 
 ## Getting Started
 
-1. Create a file in `app/views/pages/` (e.g., `app/views/pages/products/index.liquid`)
+1. Create a file in `modules/<module>/public/views/pages/` (e.g., `modules/dashboard/public/views/pages/products/index.liquid`)
 2. Add front matter with `slug` and optionally `method` and `layout`
 3. Write the controller logic using `{% liquid %}` block
 4. Fetch data with `{% graphql %}` and delegate with `{% render %}`

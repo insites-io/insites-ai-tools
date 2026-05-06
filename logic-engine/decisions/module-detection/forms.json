@@ -1,0 +1,12 @@
+{
+  "id": "module-detection-forms",
+  "module": "forms",
+  "label": "Forms",
+  "when": {
+    "signal": "has_form"
+  },
+  "rationale": "Form submissions store as activities against the matching CRM contact.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -71,26 +71,17 @@ Authorization policies are the native platform way to protect entire pages. Defi
 
 ### Define a policy
 
+> **Strict true / false only.** A policy file's last printed value is the policy result, and the platform compares it to the literal strings `"true"` and `"false"`. Any other output — `"True"`, `"1"`, `""`, an HTML fragment, a stray newline, a Liquid object reference — is treated as a denial and the page returns 403. Don't rely on Liquid truthy/falsy semantics; always emit one of the two exact tokens.
+
 ```liquid
-{% comment %} app/authorization_policies/admin_only.liquid {% endcomment %}
----
-name: admin_only
----
-{% liquid
-  if context.current_user == blank
-    return false
-  endif
-
-  graphql g = 'users/current', id: context.current_user.id
-  assign profile = g.users.results.first
-
-  if profile.roles contains 'admin' or profile.roles contains 'superadmin'
-    return true
-  endif
-
-  return false
-%}
+{% comment %} modules/dashboard/public/authorization_policies/admin_only.liquid {% endcomment %}
+{%- if context.current_user == blank -%}false{%- break -%}{%- endif -%}
+{%- graphql g = 'modules/dashboard/account/get_current_user', id: context.current_user.id -%}
+{%- assign profile = g.users.results.first -%}
+{%- if profile.roles contains 'admin' or profile.roles contains 'superadmin' -%}true{%- else -%}false{%- endif -%}
 ```
+
+The `{%- ... -%}` whitespace-trim delimiters matter: a policy file that emits `true\n` instead of `true` will be denied because the platform's string compare sees `"true\n" != "true"`. Either trim aggressively or end the file with `| strip` if you must use a multi-line `{% liquid %}` block.
 
 ### Use in page front matter
 
@@ -103,7 +94,7 @@ authorization_policies:
 {% comment %} This page only renders if the policy returns true {% endcomment %}
 ```
 
-The platform returns a 403 automatically if the policy returns `false`. No inline guard code needed.
+The platform returns a 403 automatically when the policy emits anything other than the exact string `true`. No inline guard code needed.
 
 ## Inline Role Checks
 

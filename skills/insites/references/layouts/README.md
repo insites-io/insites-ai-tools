@@ -103,4 +103,4 @@ Page Output → {{ content_for_layout }} inside Layout → Final HTML Response
 - [Partials](../partials/README.md) -- partials render inside layouts and pages
 - [Liquid Tags](../liquid/tags/README.md) -- `yield`, `content_for`, `render` tags
 - [Flash Messages](../flash-messages/README.md) -- toast notification system
-- [Common Styling Module](../modules/common-styling/README.md) -- CSS framework initialization
+- [Modules](../modules/template/README.md) -- module reference template

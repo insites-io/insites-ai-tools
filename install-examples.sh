@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/insites-io/insites-ai-tool"
+REPO_URL="https://github.com/insites-io/insites-logic-engine"
 
 usage() {
   cat <<EOF
@@ -21,8 +21,8 @@ Options:
 Examples:
   $0 --opencode
   $0 --claude --global
-  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --opencode
-  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/install-examples.sh | bash -s -- --claude --global
+  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --opencode
+  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/install-examples.sh | bash -s -- --claude --global
 EOF
 }
 

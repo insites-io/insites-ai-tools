@@ -1,0 +1,21 @@
+{
+  "id": "feature-pattern-store-locator-with-maps",
+  "kind": "feature-pattern",
+  "intent_keywords": ["store finder", "location finder", "branch finder", "dealer locator", "map", "directory"],
+  "when": {
+    "any": [
+      { "signal": "has_store_finder" },
+      { "signal": "has_map_embed" }
+    ]
+  },
+  "module_version_required": {
+    "locator": ">= 5.0.0"
+  },
+  "then": {
+    "scaffold": "locator-skeleton",
+    "rationale": "Store/branch/dealer finders fit the Locator module's geospatial query model. Don't build custom map UI; use the Locator partials."
+  },
+  "confidence": "medium",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

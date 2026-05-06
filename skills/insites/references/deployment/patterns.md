@@ -15,17 +15,14 @@ insites-cli audit
 # 3. Deploy to staging
 insites-cli deploy staging
 
-# 4. Test on staging
-insites-cli test run staging
+# 4. Review staging logs
+insites-cli logsv2 search
 
-# 5. Review staging logs
-insites-cli logs staging --filter error
-
-# 6. Deploy to production
+# 5. Deploy to production
 insites-cli deploy production
 
-# 7. Monitor production
-insites-cli logs production --follow
+# 6. Monitor production
+insites-cli logsv2 search
 ```
 
 ## Pre-Deployment Pattern
@@ -42,12 +39,8 @@ echo "Running pre-deployment checks..."
 insites-cli audit
 echo "✓ insites-cli audit passed"
 
-# 2. Run tests
-insites-cli test run staging
-echo "✓ Tests passed"
-
-# 3. Verify environment
-insites-cli env info production
+# 2. Verify environment
+insites-cli env list
 echo "✓ Environment verified"
 
 # 4. Check for errors in logs
@@ -68,9 +61,6 @@ Deploy and test on staging before production:
 ```bash
 # Deploy to staging
 insites-cli deploy staging
-
-# Run comprehensive tests
-insites-cli test run staging
 
 # Verify data integrity
 insites-cli data export staging users data/test_export.csv
@@ -106,11 +96,6 @@ jobs:
 
       - name: Deploy to Staging
         run: insites-cli deploy staging
-        env:
-          POS_STAGING_TOKEN: ${{ secrets.POS_STAGING_TOKEN }}
-
-      - name: Run Tests
-        run: insites-cli test run staging
         env:
           POS_STAGING_TOKEN: ${{ secrets.POS_STAGING_TOKEN }}
 

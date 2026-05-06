@@ -1,0 +1,123 @@
+# CMS — Gotchas
+
+Edges and quirks of the CMS module that bite when authoring or consuming file-based content. Each entry: **what bites**, **why**, **how to avoid**.
+
+---
+
+## 1. No V2 REST API for CMS objects
+
+**Bites:** code that tries `POST /cms/api/v2/pages` to create a page programmatically gets 404.
+
+**Why:** CMS does not expose a V2 REST API. Object create/update happens through IIA, the platform CLI's file sync, or direct file commits — not over HTTP.
+
+**Avoid:** if you need to author CMS objects from a script, sync files into the project tree via the platform CLI rather than calling an API. For runtime data lookups (read-only), use Liquid functions (see [`patterns.md`](patterns.md)).
+
+---
+
+## 2. Pages must not contain HTML
+
+**Bites:** putting `<div>...</div>` in a page file. The audit runs and fails — or worse, the request returns malformed output because the layout already wrapped what should have been delegated.
+
+**Why:** pages are controllers. They fetch data via `{% graphql %}` and delegate rendering to partials. HTML lives in partials only.
+
+**Avoid:** keep page bodies to `{% graphql %}`, `{% function %}`, `{% assign %}`, and `{% render %}` calls. If a page is short and you're tempted to inline a `<p>`, extract it to a partial. The platform's `insites-cli audit` enforces this rule.
+
+---
+
+## 3. Partials cannot call `{% graphql %}`
+
+**Bites:** copy-pasting a `{% graphql %}` query into a partial because the page got crowded. The page works, but partials rendered standalone (or in tests) fail.
+
+**Why:** GraphQL execution is restricted to pages. Partials should receive their data via render arguments — never fetch directly.
+
+**Avoid:** keep all data fetching at the page level. If a partial needs data not in its arguments, factor the fetch into a `lib/queries/<name>.liquid` partial called via `{% function %}` from the page, then pass the result down.
+
+---
+
+## 4. `{% form %}` tag is not used in Insites
+
+**Bites:** writing `{% form %}...{% endform %}` because that's what platformOS docs show. The form renders but CSRF doesn't behave as expected.
+
+**Why:** Insites uses plain `<form>` elements with explicit CSRF tokens; the `{% form %}` tag is the legacy platformOS pattern not adopted here.
+
+**Avoid:** write forms as `<form action="..." method="post">...{{ context.csrf_tag }}...</form>` with the explicit CSRF token field. See [`../../forms/`](../../forms/) for the canonical form patterns.
+
+---
+
+## 5. Partials can have an alias path that doesn't match their location
+
+**Bites:** searching for a partial referenced as `{% render "crm/controller/contacts/get" %}` and not finding `crm/controller/contacts/get.liquid` anywhere in the tree.
+
+**Why:** partials can declare a `path:` front-matter alias that decouples the include path from the file location. The CRM V2 controllers all use this pattern — the actual file lives at `partials/controllers/_external/v2/contacts/get_contact.liquid` but it is included via the alias `crm/controller/contacts/get`.
+
+**Avoid:** if the include path doesn't lead anywhere, grep for the full alias string in `path:` front-matter of partial files. The location and the resolution name are separate concerns.
+
+---
+
+## 6. Don't edit files under `modules/`
+
+**Bites:** editing `modules/insites_cms/...` to fix a bug in module behavior. The fix works locally, but the next module update overwrites it and the bug returns.
+
+**Why:** the `modules/` tree is owned by Insites and replaced on every module update. Edits there are not preserved.
+
+**Avoid:** override at the app level. Place an identically-named file at `app/views/...` (or `app/<whatever>/...`) and Insites will resolve to your file ahead of the module's. See [`advanced.md`](advanced.md) for the override mechanism.
+
+---
+
+## 7. Layout and partial overrides are path-based, not name-based
+
+**Bites:** creating `app/views/layouts/default-v2.liquid` and expecting it to override the module's `default.liquid`. It doesn't — overrides match by path, not by tag or name.
+
+**Why:** Insites' partial-shadowing rule resolves the include/render path against `app/` first, then `modules/<name>/`, in order. The first match wins. New names create new partials; they don't override.
+
+**Avoid:** to override `modules/insites_cms/views/layouts/email_layout`, place a file at `app/views/layouts/email_layout.liquid` (matching the path under each tree). The path determines the override target.
+
+---
+
+## 8. Page front-matter `searchable` is a sitemap signal, not a search-engine signal
+
+**Bites:** setting `searchable: false` on a page and expecting search engines to skip it.
+
+**Why:** the front-matter `searchable` flag controls whether the page appears in the platform's generated `/sitemap.xml`. Search engines may still find and index a page even if it's missing from the sitemap.
+
+**Avoid:** for true noindex behavior, set the appropriate `<meta name="robots" content="noindex">` via the page's `metadata:` front-matter, not via `searchable:`.
+
+---
+
+## 9. Global Content is a single record — concurrent edits will clash
+
+**Bites:** two admins editing globals simultaneously, both saving — last-write-wins on the entire record, not per-field merging.
+
+**Why:** there is one Global Content record per instance, replaced wholesale on save. The IIA UI does not implement field-level merge or optimistic locking.
+
+**Avoid:** coordinate Global Content edits administratively. For high-churn data don't use globals — use a database (the data module) where individual rows can be edited independently.
+
+---
+
+## 10. Web Files have aggressive CDN caching
+
+**Bites:** updating `app/assets/js/app.js` and seeing old behavior in production for hours.
+
+**Why:** static assets are served through a CDN with long cache TTLs. The `asset_url` filter handles cache-busting via versioned URLs, but only when you go through the filter.
+
+**Avoid:** always reference assets via `{{ 'js/app.js' | asset_url }}` (not hardcoded paths). For emergency cache invalidation, bump the asset version through the IIA Web Files Details tab.
+
+---
+
+## 11. Authorization policies are evaluated in order — short-circuits on first failure
+
+**Bites:** a page with `[allowed_if_admin, allowed_if_logged_in]` denies a non-logged-in user with the admin policy's flash message instead of the login policy's.
+
+**Why:** policies execute in declaration order, and the first one to fail wins (its `flash_alert` and `redirect_to` apply). They don't all run and produce a combined error message.
+
+**Avoid:** order policies from most-permissive to most-restrictive (or order them so the **most-relevant** failure message appears first). For the example, list `allowed_if_logged_in` before `allowed_if_admin`.
+
+---
+
+## 12. CMS does not fire webhooks
+
+**Bites:** subscribing to a `page_updated` event and never receiving anything.
+
+**Why:** CMS does not have webhook integration. Only modules with API-driven write paths (CRM contact/company create+update) fire webhooks.
+
+**Avoid:** for change notifications on CMS content, watch git history (if you sync files to a repo) or use the event stream API from the data module to log application-level events.

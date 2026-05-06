@@ -3,60 +3,38 @@ name: insites
 description: Consolidated skill for building on the Insites platform. Use decision trees below to find the right component, then load detailed references.
 ---
 
-## The skill leverages:
-- Correct use of Insites file structure
-- Deterministic project scaffolding
-- Safe data modeling and migrations
-- Liquid templating accuracy
-- Server-side logic (GraphQL, workflows, policies)
-- Repeatable deployment procedures
-- Minimal hallucination of unsupported features
+# Critical rules
 
----
+Follow these rules as written. Where they say "never" or "must", treat that literally — those constraints exist to prevent specific real failures (Liquid syntax errors, security holes, audit failures). Conventions described in plain prose elsewhere in this document are guidance, not absolutes; use judgement.
 
-# CRITICAL!
+## 1. Source of truth
 
-This skill defines a **strict, non-interpretable, sacred rules to help you avoid mistakes**.
-You **MUST follow guidance exactly as written**, without omission, substitution, optimization, or commentary.
+- The references in this document are the source of truth for Insites conventions.
+- Don't invent undocumented behaviors, APIs, configurations, Liquid tags/filters, or directory structures. If you can't find it documented, ask rather than guess.
+- The GraphQL schema is strict and closed — custom GraphQL types are not creatable.
+- When uncertain, consult the reference file rather than improvising.
 
-**Constraints**
-* Failure to follow constitutes NON-COMPLIANCE and VIOLATION.
+## 2. Pre-flight validation
 
-
-## 1. Source of Truth
-
-- References provided in this document is the ONLY source of truth
-- NEVER invent undocumented behaviors, APIs, configurations, Liquid tags/filters, or directory structures
-- The GraphQL schema is strict and closed; you CANNOT create custom GraphQL types
-- When uncertain, consult reference files
-
-## 2. Pre-Flight Validation (Required Before Every Change)
-
-- **After ANY file change, you MUST run the linter:**
+After every file change, run the linter:
 
 ```bash
 insites-cli audit
 ```
 
-Must pass with 0 errors before deployment.
+The audit must pass with zero errors before deployment. The hard requirements it enforces:
 
-**NO OPTIONAL REVIEW**
+- Partial filenames have no underscore prefix
+- `render 'path/name'` resolves to `app/views/partials/path/name.liquid`
+- Pages have one HTTP method each
+- Pages contain no raw HTML/JS/CSS — delegate to partials
+- Partials never call `{% graphql %}` — pages own data fetching
+- User-facing text is hardcoded directly in English
+- No hardcoded credentials — use `context.constants`
 
-- [ ] NO underscore prefix in partial filenames
-- [ ] `render 'path/name'` resolves to `app/views/partials/path/name.liquid`
-- [ ] Pages have ONE HTTP method each
-- [ ] NO raw HTML/JS/CSS in pages (pages = controllers)
-- [ ] NO GraphQL calls from partials (pages only)
-- [ ] Hardcode user-facing text directly in English (translation system is not yet configured)
-- [ ] NO hardcoded credentials (use `context.constants`)
-- [ ] `insites-cli audit` passes
+## 3. Decision trees
 
-
-## 3. Quick Decision Trees
-
-These Quick Decision Trees are designed to deterministically map any developer request to the correct Insites reference domain(s).
-They use ASCII tree visualizations for clarity and are exhaustive for all core tasks you would perform.
-You MUST fully understand requirements, consult these trees + indicated references and resolve all ambiguity before writing any code.
+The decision trees below map common developer questions to the relevant reference doc. Walk through the matching tree before writing code so you load the right reference.
 
 ---
 
@@ -69,7 +47,7 @@ Need a page or endpoint?
 ├─ JavaScript endpoint → pages/ (with .js.liquid extension)
 ├─ Form submission handler → pages/ (method: post) + forms/
 ├─ File download/redirect → pages/ + routing/
-├─ Admin-only page → pages/ + authorization_policies/
+├─ Admin-only page → pages/ + authentication/ (page front-matter `authorization_policies:`)
 ├─ Layout wrapper → layouts/
 └─ Reusable UI component → partials/
 ```
@@ -81,29 +59,93 @@ Need data operations?
 ├─ Define a data model/table → schema/
 ├─ Query records (list/search/filter) → graphql/ (records query)
 ├─ Query single record by ID → graphql/ (records query with id filter)
-├─ Create a record → graphql/ (record_create mutation) + commands/
-├─ Update a record → graphql/ (record_update mutation) + commands/
-├─ Delete a record → graphql/ (record_delete mutation) + commands/
+├─ Create a record → graphql/ (record_create mutation), called from forms/ callback_actions
+├─ Update a record → graphql/ (record_update mutation), called from forms/ callback_actions
+├─ Delete a record → graphql/ (record_delete mutation), called from forms/ callback_actions
 ├─ Related records (belongs-to/has-many) → graphql/ (related_record/related_records)
 ├─ Paginate results → graphql/ (page/per_page args)
 ├─ Upload files → schema/ (upload type) + forms/
 ├─ Seed/migrate data → migrations/
 ├─ Bulk import/export → migrations/ or insites-cli data commands
-└─ Access existing Postgres/ES/Redis → graphql/ (all DB access via GraphQL only)
+├─ Access existing Postgres/ES/Redis → graphql/ (all DB access via GraphQL only)
+└─ Contacts / companies / tasks / activities → modules/crm/ (V2 REST API; see "I need CRM data" tree below)
+```
+
+### "I need CRM data (contacts, companies, tasks, activities, attachments)"
+
+```
+Need CRM operations?
+├─ Start here (overview, audience routing)         → modules/crm/README.md
+├─ Look up V2 REST endpoints, conventions, errors  → modules/crm/api.md
+├─ Look up field-by-field schema (types, required, IIA columns) → modules/crm/schema.md
+├─ Worked HTTP examples for common flows           → modules/crm/patterns.md
+├─ API edges and quirks (no Bearer prefix, etc.)   → modules/crm/gotchas.md
+├─ Configure custom fields / system fields / webhooks in IIA → modules/crm/configuration.md
+├─ Override email layouts, hook into webhooks      → modules/crm/advanced.md
+│
+├─ Contacts (CRUD + addresses + personal info + profiles + relationships) → modules/crm/api.md (Contacts)
+├─ Companies (CRUD + addresses + info + relationships + assign-contacts)  → modules/crm/api.md (Companies)
+├─ Custom fields (definitions in IIA, values via API)                     → modules/crm/configuration.md + api.md (Custom fields)
+├─ System fields (contact type, lead source, industry, etc.)              → modules/crm/api.md (System fields) + configuration.md
+│
+├─ Tasks (CRUD + complete/open lifecycle) + task comments                 → modules/crm/globals/tasks.md
+├─ Activities (calls, meetings, notes — attached to a feature)            → modules/crm/globals/activities.md
+├─ File attachments (two-step S3 direct-upload flow)                      → modules/crm/globals/attachments.md
+├─ Event streams (audit / activity feed, append-only)                     → modules/crm/globals/event_streams.md
+│
+├─ Auth (instance API key, no Bearer prefix)                              → references/api/authentication.md
+└─ Pipelines / stages / opportunities / cases — NOT in v2 API (legacy v1 archived)
+```
+
+### "I need CMS-managed content (pages, layouts, partials, globals, emails, …)"
+
+```
+Need CMS operations?
+├─ Start here (overview, file-based stance)               → modules/cms/README.md
+├─ Look up object-type field shapes / front-matter        → modules/cms/metadata.md
+├─ Liquid-side consumption examples                       → modules/cms/patterns.md
+├─ API edges / partial-alias quirks / overrides           → modules/cms/gotchas.md
+├─ IIA admin walkthrough per object type                  → modules/cms/configuration.md
+├─ Override layouts/partials, hook_module_info             → modules/cms/advanced.md
+│
+├─ Pages (URL-addressable controllers)                    → modules/cms/metadata.md (Pages)
+├─ Layouts (HTML scaffold wrappers)                       → modules/cms/metadata.md (Layouts)
+├─ Partials (reusable HTML snippets, alias paths)         → modules/cms/metadata.md (Partials)
+├─ Web Files (static .js/.css/.html assets)               → modules/cms/metadata.md (Web Files)
+├─ Global Content (company-wide settings record)          → modules/cms/metadata.md (Global Content)
+├─ Collections (data-backed listing views)                → modules/cms/metadata.md (Collections)
+├─ Emails / SMS (templates)                               → modules/cms/metadata.md (Emails/SMS)
+└─ Authorization Policies (page-gating rules)             → modules/cms/metadata.md (Authorization Policies)
+```
+
+### "I need user-definable data tables (databases + items)"
+
+```
+Need data operations against user-defined databases?
+├─ Start here (overview, V2-first)                        → modules/data/README.md
+├─ Look up V2 REST endpoints, conventions, item schema    → modules/data/api.md
+├─ Worked HTTP examples (CRUD, pagination, schema lookup) → modules/data/patterns.md
+├─ API edges (URL prefix, PUT-not-PATCH, no UUIDs, etc.)  → modules/data/gotchas.md
+├─ Create / configure databases + columns in IIA          → modules/data/configuration.md
+│
+├─ Read database list / one database (read-only via API)  → modules/data/api.md (Databases)
+├─ CRUD database items                                    → modules/data/api.md (Database items)
+├─ Discover a database's column schema                    → modules/data/patterns.md (#1)
+├─ Bulk import — loop pattern (no native bulk endpoint)   → modules/data/patterns.md (#6)
+│
+├─ Auth (instance API key, no Bearer)                     → references/api/authentication.md
+└─ Webhooks — NONE on data module (audit-confirmed)
 ```
 
 ### "I need business logic"
 
 ```
 Need business logic?
-├─ Encapsulate a create/update/delete operation → commands/ (build → check → execute)
-├─ Validate user input → commands/ (check stage with validators)
-├─ React to something that happened → events-consumers/
+├─ Encapsulate a create/update/delete operation → forms/ (callback_actions block)
+├─ Validate user input → forms/ (YAML `validation:` blocks for fields; cross-field checks in callback_actions)
 ├─ Run code asynchronously → background-jobs/
 ├─ Run code on a schedule → background-jobs/ (with delay)
-├─ Send email after an action → events-consumers/ + emails-sms/
-├─ Process payments → modules/payments/
-└─ Wrap a data query for reuse → lib/queries/
+└─ Send email after an action → forms/ (callback_actions invoke email partial) + emails-sms/
 ```
 
 ### "I need authentication & authorization"
@@ -111,11 +153,11 @@ Need business logic?
 ```
 Need auth?
 ├─ Get current user → authentication/ (context.current_user + GraphQL)
-├─ Check if user can do something → authorization_policies/ or inline check
-├─ Block unauthorized access (403) → authorization_policies in page front matter
-├─ Redirect if not permitted → inline unless/redirect_to pattern
+├─ Check if user can do something → authentication/ (authorization_policies + inline guard patterns)
+├─ Block unauthorized access (403) → authentication/ (page front-matter `authorization_policies:`)
+├─ Redirect if not permitted → authentication/ (inline unless/redirect_to, or a policy's own `redirect_to`)
 ├─ Sign in a user → authentication/ (sign_in tag)
-├─ Define custom roles/permissions → authorization_policies/
+├─ Define a custom authorization policy → authentication/ (file at `app/authorization_policies/<name>.liquid` referenced from page front matter)
 ├─ OAuth2/social login → authentication/
 ├─ CSRF protection → forms/ (authenticity_token)
 └─ Spam protection (reCAPTCHA/hCaptcha) → forms/ (spam_protection tag)
@@ -173,9 +215,9 @@ Need Liquid help?
 ```
 Need forms?
 ├─ HTML form with CSRF → forms/ (use <form> tag, NOT {% form %})
-├─ File upload → forms/ + modules/common-styling/ (upload component)
-├─ Form validation → commands/ (check stage)
-├─ Display validation errors → partials/ (render errors from command result)
+├─ File upload → forms/ (upload field type) + modules/cms/metadata.md (Web Files / Attachments)
+├─ Form validation → forms/ (YAML `validation:` blocks; cross-field checks in callback_actions)
+├─ Display validation errors → partials/ (render errors from form result)
 ├─ Multi-step form → pages/ + sessions/
 ├─ AJAX form submission → forms/ + pages/ (.json.liquid endpoint)
 └─ Spam protection → forms/ (spam_protection tag)
@@ -188,7 +230,7 @@ Need notifications?
 ├─ Send email → emails-sms/ (email templates)
 ├─ Send SMS → emails-sms/ (SMS templates)
 ├─ Flash messages/toasts → flash-messages/
-├─ Send async (after action) → events-consumers/ + emails-sms/
+├─ Send async (after action) → background-jobs/ + emails-sms/
 └─ Email layout/styling → layouts/ (mailer layout)
 ```
 
@@ -196,14 +238,10 @@ Need notifications?
 
 ```
 Need UI/styling?
-├─ CSS framework → modules/common-styling/ (pos-* classes ONLY)
-├─ View available components → /style-guide on your instance
+├─ View available styled components → /style-guide on your instance
 ├─ Layout structure → layouts/
 ├─ Reusable UI snippets → partials/
-├─ Static assets (images, fonts, JS) → assets/
-├─ Pagination component → modules/common-styling/ (pagination partial)
-├─ File upload widget → modules/common-styling/ (upload partial)
-└─ NEVER use Tailwind/Bootstrap/custom frameworks
+└─ Static assets (images, fonts, JS) → assets/
 ```
 
 ### "I need to integrate external services"
@@ -211,9 +249,6 @@ Need UI/styling?
 ```
 Need integrations?
 ├─ Call external REST API → api-calls/
-├─ Stripe payments → modules/payments/
-├─ OpenAI/AI features → modules/openai/
-├─ WebSocket/chat → modules/chat/
 ├─ OAuth2 providers → authentication/ (OAuth2 flow with sign_in tag)
 ├─ Webhook receiver → pages/ (POST endpoint)
 └─ Store API keys/secrets → constants/
@@ -226,10 +261,9 @@ Need deployment?
 ├─ Deploy to environment → deployment/ (insites-cli deploy)
 ├─ Watch logs → cli/ (insites-cli logsv2)
 ├─ Run Liquid/GraphQL ad-hoc → cli/ (insites-cli exec)
-├─ Install modules → cli/ (insites-cli modules pull) (under development)
+├─ Pull a module's code from an instance → cli/ (insites-cli modules pull)
 ├─ Set environment constants → constants/ (insites-cli constants set)
 ├─ Run migrations → migrations/
-├─ Run tests → (testing references not yet ready — do not use)
 ├─ Lint/validate code → cli/ (insites-cli audit)
 ├─ Sync files in development → cli/ (insites-cli sync)
 └─ Environment configuration → configuration/
@@ -270,8 +304,7 @@ Use the decision trees above to identify which category applies, then load the m
 ### Business Logic
 | Category | Reference |
 |----------|-----------|
-| Commands | `references/commands/` |
-| Events & Consumers | `references/events-consumers/` |
+| Forms (state-changing logic via `callback_actions`) | `references/forms/` |
 | Background Jobs | `references/background-jobs/` |
 
 ### Liquid Templating
@@ -300,13 +333,12 @@ Use the decision trees above to identify which category applies, then load the m
 ### Modules
 | Category | Reference |
 |----------|-----------|
-| Core | `references/modules/core/` |
-| User | `references/modules/user/` |
-| Common Styling | `references/modules/common-styling/` |
-| Payments | `references/modules/payments/` |
-| Tests | `references/modules/tests/` |
-| Chat | `references/modules/chat/` |
-| OpenAI | `references/modules/openai/` |
+| CRM (insites_core) | `references/modules/crm/` |
+| CMS (insites_cms) | `references/modules/cms/` |
+| Data (insites_databases) | `references/modules/data/` |
+| Module Template | `references/modules/template/` |
+
+> Copy `references/modules/template/` to create documentation for new Insites modules. Each module gets its own directory with: README.md, api.md, configuration.md, patterns.md, gotchas.md, advanced.md.
 
 ### Configuration & Infrastructure
 | Category | Reference |
@@ -314,106 +346,93 @@ Use the decision trees above to identify which category applies, then load the m
 | Constants | `references/constants/` |
 | Configuration | `references/configuration/` |
 | Assets | `references/assets/` |
-| ~~Translations~~ | ~~`references/translations/`~~ *(not yet ready — do not use)* |
 | Sessions | `references/sessions/` |
 | Caching | `references/caching/` |
 
 ### External Integrations
 | Category | Reference |
 |----------|-----------|
-| API Calls | `references/api-calls/` |
+| API Calls (outbound HTTP) | `references/api-calls/` |
+| API Endpoints (inbound, JSON) | `references/api-endpoints/` |
+| CRM Controllers | `references/crm-controllers/` |
+| User Profile Types | `references/user-profile-types/` |
+| Payments (Stripe) | `references/payments/` |
 
 ### Developer Tools
 | Category | Reference |
 |----------|-----------|
 | CLI | `references/cli/` |
 | Deployment | `references/deployment/` |
-| ~~Testing~~ | ~~`references/testing/`~~ *(not yet ready — do not use)* |
 
 ## Critical Architecture Rules
 
-### 1. Pages = Controllers (NEVER put HTML in pages)
-```
-Page files: fetch data via {% graphql %}, delegate to partials via {% render %}
-Partials: contain ALL HTML/JS/CSS presentation
-```
+### 1. Pages are primarily controllers — extract reusable markup into partials
+Pages fetch data via `{% graphql %}` and delegate the bulk of rendering to partials via `{% render %}`. Small amounts of page-specific inline HTML are acceptable in practice (a wrapper element, a one-off heading, the body of a `.json.liquid` page) — what's *not* acceptable is duplicating markup that other pages could reuse, or putting form/card/list markup inline. Rule of thumb: more than ~10 lines of HTML in a page → extract a partial.
 → `references/pages/`, `references/partials/`
 
-### 2. GraphQL in Pages Only
-```
-NEVER call {% graphql %} from partials
-Wrap GraphQL calls in query files at app/lib/queries/
-Call queries via {% function result = 'lib/queries/...' %}
-```
-→ `references/graphql/`
+### 2. Pages own data fetching
+Pages call `{% graphql %}` and pass results to partials as render arguments. New code should not put `{% graphql %}` inside a partial. **Caveat:** existing addons (notably older `addon-*` repos) contain partials that call GraphQL directly — treat that as legacy debt. When working inside one of those addons, follow the local convention until a refactor is in scope; for new code in `app-portal` / `app-seedling`-style repos, keep GraphQL in pages.
+→ `references/graphql/`, `references/partials/`
 
-### 3. Command Pattern (build → check → execute)
-```
-All create/update/delete operations go through Commands
-Commands use inline build → check → execute pattern
-Validation errors are returned, not thrown
-```
-→ `references/commands/`
+### 3. State changes live in form `callback_actions`
+Create/update/delete operations are driven by forms. Each `forms/<name>.liquid` declares its YAML schema (fields, validation) and a Liquid `callback_actions` block that runs the GraphQL mutations and side effects when the form is submitted. There is no separate `app/lib/commands/` directory in canonical Combinate.
+→ `references/forms/`
 
-### 4. Module System (READ-ONLY)
-```
-modules/ directory is READ-ONLY — never edit files there
-Override module behavior via documented override mechanism only
-Required: core, user, common-styling
-Optional: payments, payments_stripe, tests, chat, openai
-```
+### 4. Modules are read-only
+Don't edit files under `modules/` — that tree is replaced wholesale on every module update, so changes are lost. Modules are preinstalled per instance and updated through the Insites console, not the CLI. To override module behavior, place a same-path file under your `app/` tree; Insites resolves your file ahead of the module's.
 → `references/modules/`
 
-### 5. Extract Reusable Code (DRY)
-```
-When you write the same logic 2+ times, extract it into a reusable partial:
-- Repeated validation → lib/validations/presence.liquid
-- Repeated GraphQL execute → lib/commands/execute.liquid
-- Repeated UI blocks → shared/card.liquid, shared/pagination.liquid
-- Repeated auth checks → authorization_policies/ or lib/helpers/guard.liquid
-- Repeated data formatting → lib/helpers/format_price.liquid
-
-Use {% function %} for partials that return data.
-Use {% render %} for partials that produce HTML.
-```
+### 5. Extract reusable code (DRY)
+When the same logic appears twice, extract it. Use `{% function %}` for partials that return data; use `{% render %}` for partials that produce HTML. Repeated access checks belong in a reusable `authorization_policies` file referenced from page front matter, not duplicated inline.
 → `references/partials/`
 
-### 6. Liquid Coding Standards
-```
-Do NOT line-wrap statements within {% liquid %} blocks
-Keep each statement on a single line
-Variables in Insites are LOCAL to the partial (use export tag to share)
-```
+### 6. Liquid coding standards
+Statements within `{% liquid %}` blocks must stay on a single line each — line-wrapping causes Liquid syntax errors. Variables in Insites are local to the partial; use the `export` tag to share them across renders.
 → `references/liquid/`
 
 ## Project Structure
 
+Insites projects organise code by **module**, not by a flat root layout. Every project has a top-level `modules/` directory containing one or more module folders (e.g. `modules/dashboard/`, `modules/website/`). Each module follows the same internal structure under `modules/<name>/public/`.
+
 ```
 project-root/
-├── app/
-│   ├── assets/                    # Static files (images, fonts, styles, scripts)
-│   ├── views/
-│   │   ├── pages/                 # Controllers (NO HTML here)
-│   │   ├── layouts/               # Wrapper templates
-│   │   └── partials/              # Reusable template snippets (ALL HTML here)
-│   ├── lib/
-│   │   ├── commands/              # Business logic (build → check → execute)
-│   │   ├── queries/               # Data retrieval wrappers
-│   │   ├── events/                # Event definitions
-│   │   └── consumers/             # Event handlers
-│   ├── schema/                    # Database table definitions (YAML)
-│   ├── graphql/                   # GraphQL query/mutation files (.graphql)
-│   ├── emails/                    # Email templates
-│   ├── smses/                     # SMS templates
-│   ├── api_calls/                 # Third-party API integrations
-│   ├── translations/              # i18n content (YAML)
-│   ├── migrations/                # Data seeding and schema migrations
-│   ├── authorization_policies/    # Access control policies
-│   └── config.yml                 # Feature flags and configuration
-├── modules/                       # Downloaded/custom modules (READ-ONLY)
-├── .insites                           # Environment endpoints/project root sentinel file
-└── package.json                   # (optional) Node.js dependencies
+├── app.yml                            # Project-level configuration
+├── modules/
+│   ├── <module>/                      # e.g. dashboard, website, portal
+│   │   ├── public/
+│   │   │   ├── views/
+│   │   │   │   ├── pages/             # Routed Liquid pages
+│   │   │   │   ├── layouts/           # Page wrappers (e.g. portal_default)
+│   │   │   │   └── partials/          # Reusable template snippets
+│   │   │   ├── forms/                 # Form definitions (YAML + Liquid callback_actions)
+│   │   │   ├── graphql/               # Queries + mutations grouped by domain
+│   │   │   ├── authorization_policies/
+│   │   │   ├── api_calls/             # Third-party API integrations grouped by service
+│   │   │   ├── schema/                # Database table definitions (YAML)
+│   │   │   ├── user_profile_types/    # Custom user-profile schemas
+│   │   │   ├── emails/                # Email templates
+│   │   │   ├── migrations/            # Data seeding and schema migrations
+│   │   │   └── assets/                # Module-scoped JS/CSS/images
+│   │   └── test/                      # Module-level test fixtures (if any)
+│   └── <another-module>/
+└── package.json                       # (optional) Node.js dependencies
 ```
+
+**Module-prefixed paths.** Render, include, and graphql calls always start with the module name:
+
+```liquid
+{% render 'modules/dashboard/path/to/partial' %}
+{% include 'modules/dashboard/path/to/partial' %}
+{% graphql x = 'modules/dashboard/account/get_user' %}
+```
+
+For the full canonical layout reference (per-directory purpose, naming conventions, examples), see [`references/project-structure.md`](references/project-structure.md).
+
+### Cross-module conventions
+
+- **No `app/lib/commands/` directory.** State-changing logic lives inline in pages or in `forms/<name>.liquid` `callback_actions` blocks.
+- **No `app/lib/queries/` directory.** GraphQL files live at `modules/<module>/public/graphql/<domain>/<operation>.graphql` and are called directly from pages or forms.
+- **Layouts are namespaced.** E.g. `portal_default`, `portal_form`, `dashboard_default`.
 
 ## File Extension Conventions
 
@@ -442,8 +461,6 @@ project-root/
 - Direct database access outside GraphQL
 - Deploying without running `insites-cli audit`
 - Syncing files outside `./app/`
-- Using Tailwind, Bootstrap, or custom CSS frameworks (use common-styling)
-- ~~Hardcoding user-facing text (use translations)~~ *(translations not yet configured — use plain English text for now)*
 - Hardcoding API keys or secrets (use `context.constants`)
 
 ## Documentation Links

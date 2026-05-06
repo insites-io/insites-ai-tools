@@ -179,23 +179,6 @@ First request caches result. Concurrent requests still compute independently bef
 {% endif %}
 ```
 
-## Testing with Cache Enabled
-
-### Tests Fail Due to Stale Cache
-
-```bash
-# Cache persists between test runs
-{% cache 'test-data', expire: 3600 %}
-  <!-- Stale test data from previous run -->
-{% endcache %}
-
-# Solution: Clear cache before tests
-insites-cli cache clear --all staging
-pytest
-```
-
-Clear caches between test runs to ensure clean state.
-
 ## See Also
 
 - [Configuration Guide](./configuration.md)

@@ -92,29 +92,27 @@ For authorization policies, verify the policy returns `true` or `false` correctl
 
 ### "authorization_policies/ not working as expected"
 
-**Cause:** Authorization policies must return `true` or `false`. Common issues include: not loading the user profile inside the policy, returning a string instead of a boolean, or a typo in the policy name referenced in front matter.
+**Cause:** The platform reads the policy file's *output* and compares it as a string against the literal `"true"`. Anything else — `"True"`, `"1"`, `"true\n"`, `""`, an HTML/Liquid object dump — is a denial. Common failure modes:
 
-**Solution:** Ensure your policy loads the profile and returns a boolean:
+1. **Trailing whitespace / newline.** A multi-line `{% liquid %}` block that ends with `assign result = true` and then prints it via a final `{{ result }}` will usually emit `true\n` (because of the file's trailing newline), which fails the string compare.
+2. **Returning a Liquid truthy object instead of the string.** Liquid considers everything except `false` and `nil` truthy, but the platform doesn't — it wants the literal token.
+3. **Typo in policy name** referenced in page front matter — the policy file is silently treated as missing → denial.
+
+**Solution:** Use whitespace-trim delimiters and emit *only* `true` or `false`:
 
 ```liquid
-{% comment %} app/authorization_policies/require_login.liquid {% endcomment %}
----
-name: require_login
----
-{% liquid
-  if context.current_user
-    return true
-  endif
-  return false
-%}
+{%- comment -%}modules/dashboard/public/authorization_policies/require_login.liquid{%- endcomment -%}
+{%- if context.current_user -%}true{%- else -%}false{%- endif -%}
 ```
 
-And reference it correctly in the page front matter (use the `name` value, not the filename):
+Reference by `name` (matching the YAML front-matter `name:` field of the policy, not just the filename) in the page:
 
 ```yaml
 authorization_policies:
   - require_login
 ```
+
+If you need to debug a denial, temporarily prepend `{% log "policy result: " %}{% log result %}` *before* the final emit and check `insites-cli logsv2` — but never leave logging in a deployed policy.
 
 ## Limits
 

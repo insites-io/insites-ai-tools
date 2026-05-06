@@ -222,5 +222,4 @@ Use the `insites-cli gui serve` command to preview layouts locally during develo
 - [Layouts Patterns](patterns.md) -- standard workflows
 - [Layouts Gotchas](gotchas.md) -- common errors and limits
 - [Assets Reference](../assets/README.md) -- managing CSS and JS assets
-- [Translations](../translations/README.md) -- i18n for layout text
 - [Caching](../caching/README.md) -- caching strategies for layout partials

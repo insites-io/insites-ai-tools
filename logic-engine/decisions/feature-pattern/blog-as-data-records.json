@@ -1,0 +1,16 @@
+{
+  "id": "feature-pattern-blog-as-data-records",
+  "kind": "feature-pattern",
+  "intent_keywords": ["blog", "news", "articles", "posts", "case studies"],
+  "when": {
+    "signal": "has_data_collection_segments",
+    "matches": ["blog", "news", "articles", "posts", "insights", "case-studies"]
+  },
+  "then": {
+    "scaffold": "data-collection-skeleton",
+    "rationale": "Repeating URL segments (e.g. /blog/post-1, /blog/post-2) are content collections, not standalone CMS pages. Model them as Data records: one schema per collection, list and detail pages render via GraphQL queries against the records table."
+  },
+  "confidence": "high",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

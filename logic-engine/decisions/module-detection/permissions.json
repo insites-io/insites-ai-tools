@@ -1,0 +1,22 @@
+{
+  "id": "module-detection-permissions",
+  "module": "permissions",
+  "label": "Permissions",
+  "when": {
+    "any": [
+      {
+        "signal": "has_member_login"
+      },
+      {
+        "signal": "has_account_dashboard"
+      },
+      {
+        "signal": "has_gated_content"
+      }
+    ]
+  },
+  "rationale": "Sign-in, registration, password reset, and gated content require the Permissions module.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

@@ -179,5 +179,4 @@ insites-cli data clean dev test_data
 ## See Also
 
 - [CLI Configuration](./configuration.md)
-- [Testing Troubleshooting](../testing/gotchas.md)
 - [Deployment Issues](../deployment/gotchas.md)

@@ -1,197 +1,313 @@
 # CLI Commands Reference
 
-## Deploy Command
+Complete reference for `insites-cli`. All command signatures verified against `insites-cli help <command>` output.
 
-Deploy your application to an environment:
+The CLI's top-level commands fall into three groups:
+- **Direct verbs** — `archive`, `audit`, `deploy`, `init`, `pull`, `sync`
+- **Subcommand groups** — `constants`, `data`, `duplicate`, `env`, `exec`, `gui`, `logsv2`, `migrations`, `modules`
+
+Run `insites-cli help <command>` for the live signature on any instance — this doc reflects the same source.
+
+---
+
+## archive
+
+Create a deployment archive without deploying. Useful for CI/CD pipelines.
 
 ```bash
-insites-cli deploy [environment]
-insites-cli deploy dev
-insites-cli deploy production
+insites-cli archive
+insites-cli archive -o ./tmp/release.zip
 ```
 
-Deployment flow:
-1. Runs insites-cli audit validation
-2. Syncs files
-3. Executes migrations
-4. Applies schema changes
-5. Uploads assets to CDN
+| Option | Default | Description |
+|---|---|---|
+| `-o, --output <output>` | `./tmp/release.zip` | Archive output path |
 
-## Sync Command
+---
 
-Synchronize local changes without full deployment:
+## audit
+
+Check the project for deprecations, recommendations, and errors. Used in pre-commit and pre-deploy gates.
 
 ```bash
-insites-cli sync [environment]
-insites-cli sync dev
-insites-cli sync --watch staging
+insites-cli audit
 ```
 
-Watch mode for continuous sync:
+No options. The audit traverses `app/` and reports any rules that fire. Exit code is non-zero on errors, zero on warnings/info only.
+
+---
+
+## deploy
+
+Deploy code to an environment. The environment is required.
 
 ```bash
-insites-cli sync dev --watch
+insites-cli deploy <environment>
+insites-cli deploy --partial-deploy <environment>
 ```
 
-## GUI Serve Command
+(Alias: `d`)
 
-Local development server with hot reload:
+| Option | Description |
+|---|---|
+| `-p, --partial-deploy` | Partial deployment — does not remove data from directories missing in the build |
+
+Deployment runs the audit, syncs files, executes pending migrations, and updates the environment.
+
+---
+
+## sync
+
+Synchronize local changes to an environment. **Watch mode is the default** — `sync <env>` opens a long-running watcher that pushes changes as files are saved.
 
 ```bash
-insites-cli gui serve
-insites-cli gui serve --port 3000
+insites-cli sync <environment>
+insites-cli sync <environment> -c 5
+insites-cli sync <environment> -f path/to/file.liquid
+insites-cli sync <environment> -l
 ```
 
-Access at `http://localhost:3000`
+(Alias: `s`)
 
-## Logs Command
+| Option | Default | Description |
+|---|---|---|
+| `-c, --concurrency <number>` | `3` | Maximum concurrent connections to the server |
+| `-f, --file <file>` | — | Sync a single file once and exit (no watcher) |
+| `-l, --livereload` | off | Use livereload to refresh the browser on each sync |
 
-View instance logs with filtering. Use `logsv2` (alias: `l2`):
+**There is no `--watch` flag** — watch is the default. Use `-f` to opt out and sync exactly one file.
+
+---
+
+## gui
+
+Manage the local GUI for content editing, GraphQL, and logs.
 
 ```bash
-insites-cli logsv2 [environment]
-insites-cli logsv2 dev
-insites-cli logsv2 dev --filter "error"
-insites-cli logsv2 staging --filter "background_job" --follow
+insites-cli gui serve [environment]
 ```
 
-Filter options:
-- `error`: Error messages only
-- `background_job`: Background job logs
-- `api_call`: API call logs
-- Custom patterns using regex
+| Subcommand | Description |
+|---|---|
+| `serve [environment]` | Serve the GUI for files from the given environment |
 
-## Liquid and GraphQL Execution
+`gui serve` does not accept a `--port` flag — it picks an available port and prints the URL on start.
 
-Execute Liquid templates and GraphQL queries directly:
+---
+
+## logsv2
+
+Display logs and errors. **`logsv2` has subcommands, not flags** — pick the one you need.
 
 ```bash
-insites-cli exec [environment] [query_type] [query]
-insites-cli exec dev liquid "{{ 'Hello' }}"
-insites-cli exec dev graphql "{ users { id name } }"
+insites-cli logsv2 search
+insites-cli logsv2 searchAround
+insites-cli logsv2 alerts
+insites-cli logsv2 reports
 ```
 
-## Modules Management
+(Alias: `l2`)
 
-### Install Module
+| Subcommand | Description |
+|---|---|
+| `search` | Search logs |
+| `searchAround` | Search the stream for records around a timestamp |
+| `alerts` | Manage alerts |
+| `reports` | Predefined reports based on logs |
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually.
+The CLI's per-subcommand help does not surface argument detail beyond what's shown here; check `insites-cli logsv2 search` interactive output (or your instance's docs) for filter/range arguments.
 
-Pull an existing module from an instance:
+---
+
+## exec
+
+Execute Liquid or GraphQL on an instance. **Type goes first, environment second.**
 
 ```bash
-insites-cli modules pull @platform-os/blog dev
+insites-cli exec liquid <environment> [code]
+insites-cli exec graphql <environment> [graphql]
 ```
 
-### Download Module
+| Subcommand | Args | Description |
+|---|---|---|
+| `liquid <environment> [code]` | env required, code optional | Execute Liquid code |
+| `graphql <environment> [graphql]` | env required, query optional | Execute a GraphQL query |
 
-Download module code locally:
+Examples:
 
 ```bash
-insites-cli modules download @platform-os/blog ./modules
+insites-cli exec liquid staging "{{ 'now' | date: '%Y-%m-%d' }}"
+insites-cli exec graphql staging "{ records(per_page: 1) { results { id } } }"
 ```
 
-### List Modules
+If `[code]` / `[graphql]` is omitted, the CLI reads from stdin or opens an editor (depends on terminal).
 
-View installed modules:
+---
+
+## init
+
+Initialize the project directory structure.
 
 ```bash
-insites-cli modules list
-insites-cli modules list dev
+insites-cli init
 ```
 
-## Constants Management
+No arguments. Run once at the start of a new project.
 
-### Set Constants
+---
 
-Configure global constants:
+## pull
+
+Export app data from an environment into a zip file.
 
 ```bash
-insites-cli constants set dev MY_API_KEY "secret123"
-insites-cli constants set staging SENDGRID_TOKEN "token_xyz"
+insites-cli pull <environment>
+insites-cli pull <environment> -p ./backup.zip
 ```
 
-### List Constants
+| Option | Default | Description |
+|---|---|---|
+| `-p, --path <export-file-path>` | `app.zip` | Output file path |
 
-View all constants:
+---
+
+## duplicate
+
+Duplicate one environment into another.
 
 ```bash
-insites-cli constants list dev
-insites-cli constants list production
+insites-cli duplicate init <sourceEnv> <targetEnv>
 ```
 
-## Migrations Management
+| Subcommand | Args | Description |
+|---|---|---|
+| `init <sourceEnv> <targetEnv>` | both required | Duplicate source into target (code, data, configuration) |
 
-### Generate Migration
+---
 
-Create new migration:
+## modules
+
+Manage modules on an instance.
 
 ```bash
-insites-cli migrations generate [environment] [migration_name]
-insites-cli migrations generate dev create_users_table
+insites-cli modules init <name>
+insites-cli modules list [environment]
+insites-cli modules pull [environment] <name>
+insites-cli modules remove [environment] <name>
+insites-cli modules version [version] --package
 ```
 
-### Run Migrations
+| Subcommand | Args | Description |
+|---|---|---|
+| `init <name>` | name required | Initialize a module locally with the starter structure |
+| `list [environment]` | env optional | List installed modules on the environment |
+| `pull [environment] <name>` | name required | Pull a module from an instance |
+| `remove [environment] <name>` | name required | Remove module from instance (removes configuration and data) |
+| `version [version] --package` | `--package` required | Create a new version of the module |
 
-Execute pending migrations:
+---
+
+## migrations
+
+Manage migrations on an environment.
 
 ```bash
-insites-cli migrations run [environment]
-insites-cli migrations run staging
-```
-
-### List Migrations
-
-View migration history:
-
-```bash
+insites-cli migrations generate [environment] <name>
 insites-cli migrations list [environment]
-insites-cli migrations list production
+insites-cli migrations run <timestamp> [environment]
 ```
 
-## Data Management
+| Subcommand | Args | Description |
+|---|---|---|
+| `generate [environment] <name>` | name required | Generate a new empty migration file |
+| `list [environment]` | env optional | List migrations and their statuses |
+| `run <timestamp> [environment]` | timestamp required | Run the migration matching the timestamp |
 
-### Export Data
+---
 
-Export database records:
+## constants
+
+Manage constant variables on an instance. **Values are passed via `--name` / `--value` flags, not positional arguments.**
 
 ```bash
-insites-cli data export [environment] [type] [file]
-insites-cli data export dev users data/users.csv
+insites-cli constants set [environment] --name TOKEN --value SECRET_TOKEN
+insites-cli constants unset [environment] --name TOKEN
+insites-cli constants list [environment]
+SAFE=1 insites-cli constants list [environment]
 ```
 
-### Import Data
+| Subcommand | Args | Description |
+|---|---|---|
+| `set [environment] --name X --value Y` | both flags required | Set a constant |
+| `unset [environment] --name X` | name required | Unset a constant |
+| `list [environment]` | env optional | List all constants. Values are masked by default |
 
-Import records:
+The `SAFE=1` env var on `constants list` shows the full unmasked values:
 
 ```bash
-insites-cli data import [environment] [type] [file]
-insites-cli data import staging users data/users.csv
+SAFE=1 insites-cli constants list staging
 ```
 
-### Clean Data
+---
 
-Remove all records (use with caution):
+## env
+
+Manage environments (the local CLI registry of instances you can target).
 
 ```bash
-insites-cli data clean [environment] [type]
-insites-cli data clean dev users
+insites-cli env add [environment] --email user@example.com --instance-uuid abcd-ef123-4567
+insites-cli env list
 ```
 
-## Testing Command
+| Subcommand | Args | Description |
+|---|---|---|
+| `add [environment] --email <e> --instance-uuid <u>` | flags required | Add a new environment |
+| `list` | no args | List all known environments |
 
-Run automated tests:
+Example:
 
 ```bash
-insites-cli test run [environment]
-insites-cli test run staging
-insites-cli test run dev --verbose
+insites-cli env add staging --email dev@example.com --instance-uuid 12345-abcde-67890
 ```
 
-Returns contract compliance results.
+---
+
+## data
+
+Export, import, or clean data on an instance.
+
+```bash
+insites-cli data export [environment]
+insites-cli data import [environment]
+insites-cli data clean [environment]
+```
+
+| Subcommand | Args | Description |
+|---|---|---|
+| `export [environment]` | env optional | Export instance data to a JSON file |
+| `import [environment]` | env optional | Import instance data from a JSON file |
+| `clean [environment]` | env optional | Remove all stored data (users, models, etc.). **Irreversible.** |
+
+`clean` is destructive and not reversible — only use against staging/dev environments you are willing to wipe.
+
+---
+
+## help
+
+Display help for any command or subcommand.
+
+```bash
+insites-cli help                  # top-level commands
+insites-cli help <command>        # signature for a specific command
+insites-cli help <command> <sub>  # falls back to top-level help (CLI limitation)
+```
+
+The CLI's help system surfaces the top-level signature for each command but does not currently render per-leaf-subcommand help — if `insites-cli help modules version` returns top-level help, look at the parent command's help (`insites-cli help modules`) for the subcommand signature.
+
+---
 
 ## See Also
 
-- [CLI Configuration](./configuration.md)
-- [Advanced CLI Patterns](./advanced.md)
-- [CLI Troubleshooting](./gotchas.md)
+- [CLI Configuration](./configuration.md) — environment files, auth tokens, env var setup
+- [Advanced CLI Patterns](./advanced.md) — composing commands in CI, scripting
+- [CLI Troubleshooting](./gotchas.md) — common failure modes

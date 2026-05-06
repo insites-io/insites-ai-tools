@@ -264,5 +264,4 @@ insites-cli logs | grep 'FAILED'
 - [Background Jobs - API](./api.md)
 - [Background Jobs - Gotchas](./gotchas.md)
 - [Background Jobs - Advanced](./advanced.md)
-- [Events & Consumers](../../events-consumers/index.md)
-- [insites-cli Documentation](../../commands/insites-cli.md)
+- [insites-cli Documentation](../cli/api.md)

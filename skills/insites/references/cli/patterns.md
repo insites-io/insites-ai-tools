@@ -40,50 +40,31 @@ Checks performed:
 - Partial naming conventions
 - Asset references
 
-### Staging Tests
-
-Execute tests on staging:
-
-```bash
-insites-cli test run staging
-insites-cli logsv2 staging --filter error
-```
-
 ## Environment Promotion Pipeline
 
 ### Dev → Staging → Production
 
-1. Deploy to development and test:
-
 ```bash
+# 1. Deploy to development
 insites-cli deploy dev
-insites-cli test run dev
-```
 
-2. Deploy to staging for QA:
-
-```bash
+# 2. Deploy to staging for QA
 insites-cli deploy staging
-insites-cli test run staging
-```
 
-3. Deploy to production:
-
-```bash
+# 3. Deploy to production
 insites-cli deploy production
 ```
 
 ## Module Management Pattern
 
-### Installing Dependencies
+### Working with modules
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually.
+Modules are preinstalled per Insites instance and updated through the Insites console, not the CLI. There is no `insites-cli modules install` command. The CLI's module commands are for **pulling a module's local source** (to read or override its files locally), not for installing modules onto an instance.
 
-Pull existing modules from an instance:
+Pull a module's source from an instance:
 
 ```bash
-insites-cli modules pull @platform-os/core dev
-insites-cli modules pull @platform-os/blog dev
+insites-cli modules pull <module-name> dev
 insites-cli modules pull my-custom-module dev
 ```
 
@@ -152,8 +133,7 @@ insites-cli data clean staging test_records
 ENV=$1
 insites-cli audit
 insites-cli deploy $ENV
-insites-cli test run $ENV
-insites-cli logsv2 $ENV --filter error
+insites-cli logsv2 search
 ```
 
 ## See Also

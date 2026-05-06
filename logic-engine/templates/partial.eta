@@ -1,0 +1,30 @@
+{# Partial template — HTML-producing reusable component.
+   See logic-engine/rules/partials.md for the rules this template enforces:
+   - partials-no-underscore-prefix: filename must not start with _
+   - render-vs-function-tags: render for HTML output, function for data
+   - graphql-in-partials-restricted: only data-heavy block partials may have GraphQL
+
+   Params:
+     name              — partial name (without leading _ or .liquid)
+     params            — array of expected parameter names (documented at top)
+     allows_graphql    — boolean. If true, partial is a data-heavy block; otherwise pure presentation.
+#}
+{% comment %}
+  Partial: <%= it.name %>
+  Expected parameters:
+<% if (it.params && it.params.length > 0) { -%>
+<% it.params.forEach(function(p) { -%>
+    - <%= p %>
+<% }) -%>
+<% } else { -%>
+    (none)
+<% } -%>
+
+  Rules:
+  - Pure presentation: no GraphQL, no state changes. Receive data as parameters from the caller.
+<% if (!it.allows_graphql) { -%>
+  - This partial is marked as pure presentation. Do not add {% graphql %} blocks.
+<% } -%>
+{% endcomment %}
+
+{% comment %} TODO: partial body. {% endcomment %}

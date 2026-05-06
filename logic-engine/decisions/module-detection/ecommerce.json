@@ -1,0 +1,52 @@
+{
+  "id": "module-detection-ecommerce",
+  "module": "ecommerce",
+  "label": "Ecommerce",
+  "when": {
+    "any": [
+      {
+        "signal": "has_cart"
+      },
+      {
+        "signal": "has_checkout_route"
+      },
+      {
+        "signal": "has_product_listing"
+      },
+      {
+        "signal": "platform_equals",
+        "value": "shopify"
+      }
+    ]
+  },
+  "confidence_thresholds": {
+    "high": {
+      "all": [
+        {
+          "signal": "has_cart"
+        },
+        {
+          "signal": "has_checkout_route"
+        }
+      ]
+    },
+    "medium": {
+      "signal": "has_product_listing"
+    }
+  },
+  "rationale": "Cart + checkout signal a full ecommerce flow. Products only suggest a catalog without commerce.",
+  "scaffold": "ecommerce-skeleton",
+  "reference": [
+    {
+      "repo": "addon-ecommerce",
+      "path": "modules/ecommerce/public/views/pages/checkout/checkout.liquid"
+    },
+    {
+      "repo": "addon-ecommerce",
+      "path": "modules/ecommerce/public/forms/checkout/checkout_payment.liquid"
+    }
+  ],
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

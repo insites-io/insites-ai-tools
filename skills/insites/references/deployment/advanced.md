@@ -22,13 +22,10 @@ production_green:
 # 1. Deploy to inactive environment (green)
 insites-cli deploy production_green
 
-# 2. Run tests
-insites-cli test run production_green
-
-# 3. Switch traffic to green
+# 2. Switch traffic to green
 # Update load balancer / DNS
 
-# 4. Keep blue as instant rollback
+# 3. Keep blue as instant rollback
 ```
 
 ## Canary Deployments
@@ -164,18 +161,8 @@ jobs:
       - run: npm install -g /insites-cli
       - run: insites-cli audit
 
-  test:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: npm install -g /insites-cli
-      - run: insites-cli test run staging
-        env:
-          POS_TOKEN: ${{ secrets.POS_STAGING_TOKEN }}
-
   deploy_staging:
-    needs: test
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -266,4 +253,3 @@ insites-cli logs production --filter slow_query
 
 - [CLI Advanced Techniques](../cli/advanced.md)
 - [Deployment Patterns](./patterns.md)
-- [Testing Advanced](../testing/advanced.md)

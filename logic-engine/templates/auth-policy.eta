@@ -1,0 +1,38 @@
+{# Authorization policy template.
+   See logic-engine/rules/authorization.md for the rules this template enforces:
+   - auth-policy-explicit-true-false: every code path echoes true or false
+   - auth-policies-handle-nil: defensive nil checks before nested access
+
+   Params:
+     name             — snake_case policy name
+     redirect_to      — 404 | 401 | sign-in | <slug>
+     description      — short policy description
+     check_logic      — Liquid logic that determines the boolean (in the body)
+#}
+---
+name: <%= it.name %>
+redirect_to: <%= it.redirect_to || '404' %>
+metadata: {
+  "auth_policy_description": "<%= it.description || it.name %>"
+}
+---
+{% liquid
+  comment
+    Defensive: fail closed if required context is missing.
+  endcomment
+
+<% if (it.check_logic) { %>
+  <%- it.check_logic -%>
+<% } else { %>
+  comment
+    TODO: implement the policy check. Always echo true or false in every path.
+  endcomment
+
+  if context.current_user == blank
+    echo false
+    return
+  endif
+
+  echo true
+<% } %>
+%}

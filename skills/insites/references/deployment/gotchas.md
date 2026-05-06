@@ -211,29 +211,6 @@ properties:
     type: string
 ```
 
-## Test Failures During Deployment
-
-> **CLI STATUS:** `insites-cli test run` is under development and not yet available. The examples below describe intended future behavior.
-
-### Tests Fail on Staging
-
-**Issue**: `insites-cli test run staging` fails
-
-**Impact**: Production deployment blocked
-
-**Solution**:
-```bash
-# Run tests locally first
-insites-cli test run dev
-
-# Check test file syntax
-cat app/lib/test/user_test.liquid
-
-# Fix failing tests before deploy
-# Rerun tests
-insites-cli test run staging
-```
-
 ## Deployment Rollback
 
 ### Cannot Rollback Automatically
@@ -241,7 +218,7 @@ insites-cli test run staging
 **Issue**: No automatic rollback mechanism
 
 **Mitigation**:
-1. Always test on staging first
+1. Always verify on staging first
 2. Create backup migrations
 3. Version schema changes
 4. Keep previous code branch ready
@@ -286,5 +263,4 @@ insites-cli deploy production  # Not "insites-cli deploy"
 ## See Also
 
 - [CLI Gotchas](../cli/gotchas.md)
-- [Testing Troubleshooting](../testing/gotchas.md)
 - [Deployment Patterns](./patterns.md)

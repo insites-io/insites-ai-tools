@@ -1,0 +1,10 @@
+{
+  "id": "module-detection-ai",
+  "module": "ai",
+  "label": "AI",
+  "always_available": true,
+  "rationale": "Always available on every Insites instance \u2014 not migrated from the source.",
+  "kind": "module-detection",
+  "audit_ref": "audit/v0-conflicts.md",
+  "status": "draft"
+}

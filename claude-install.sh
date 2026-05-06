@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/insites-io/insites-ai-tool"
+REPO_URL="https://github.com/insites-io/insites-logic-engine"
 SKILL_NAME="insites"
 
 usage() {
@@ -16,8 +16,8 @@ Options:
   -h, --help      Show this help message
 
 Examples:
-  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/claude-install.sh | bash
-  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-ai-tool/master/claude-install.sh | bash -s -- --global
+  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/claude-install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/insites-io/insites-logic-engine/main/claude-install.sh | bash -s -- --global
 EOF
 }
 

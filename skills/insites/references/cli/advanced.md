@@ -21,16 +21,9 @@ insites-cli audit || exit 1
 # Deploy
 insites-cli deploy $ENV
 
-# Run tests
-echo "Testing deployment..."
-insites-cli test run $ENV || exit 1
-
-# Check for errors
+# Check for errors via logsv2 search subcommand
 echo "Checking logs for errors..."
-ERRORS=$(insites-cli logsv2 $ENV --filter "error" | wc -l)
-if [ $ERRORS -gt 0 ]; then
-  echo "Warning: Found error logs"
-fi
+insites-cli logsv2 search
 
 echo "Deployment completed successfully"
 ```
@@ -43,11 +36,11 @@ Usage:
 
 ### Batch Module Pull
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually. You can pull existing modules from an instance:
+Modules are preinstalled and console-managed; the CLI's `modules pull` is for fetching a module's local source. Pull several at once:
 
 ```bash
 #!/bin/bash
-MODULES=("@platform-os/core" "@platform-os/blog" "my-module")
+MODULES=("module-a" "module-b" "my-module")
 ENV=$1
 
 for MODULE in "${MODULES[@]}"; do
@@ -215,7 +208,6 @@ Enable detailed logging:
 
 ```bash
 insites-cli deploy dev --verbose
-insites-cli test run staging --verbose
 ```
 
 ### Dry Run Deployments

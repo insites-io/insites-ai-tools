@@ -4,5 +4,11 @@
 .improve-output/
 .opencode/
 scripts/
-!plugins/claude/insites-tools-plugin/insites-tools/scripts/
 docs/
+*.log
+
+# engine package build/install artifacts
+engine/dist/
+engine/node_modules/
+engine/logic-engine/
+node_modules/

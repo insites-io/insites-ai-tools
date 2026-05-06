@@ -1,0 +1,52 @@
+{
+  "name": "@insites/logic-engine",
+  "version": "0.1.0-draft",
+  "description": "Insites Logic Engine — rules, decisions, validators, and templates that drive Insites Studio and any IDE consuming the logic-engine corpus.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "insites-logic-engine": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "logic-engine/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src/",
+    "prepack": "rm -rf logic-engine && cp -R ../logic-engine ./logic-engine && npm run build",
+    "postpack": "rm -rf logic-engine"
+  },
+  "dependencies": {
+    "eta": "^3.4.0",
+    "zod": "^3.23.0",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/insites-io/insites-logic-engine.git",
+    "directory": "engine"
+  },
+  "keywords": [
+    "insites",
+    "liquid",
+    "graphql",
+    "scaffold",
+    "logic-engine",
+    "ai-tools"
+  ]
+}
