@@ -36,7 +36,7 @@ Usage:
 
 ### Batch Module Pull
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually. You can pull existing modules from an instance:
+Modules are preinstalled and console-managed; the CLI's `modules pull` is for fetching a module's local source. Pull several at once:
 
 ```bash
 #!/bin/bash

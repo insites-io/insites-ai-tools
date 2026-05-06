@@ -57,11 +57,11 @@ insites-cli deploy production
 
 ## Module Management Pattern
 
-### Installing Dependencies
+### Working with modules
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually.
+Modules are preinstalled per Insites instance and updated through the Insites console, not the CLI. There is no `insites-cli modules install` command. The CLI's module commands are for **pulling a module's local source** (to read or override its files locally), not for installing modules onto an instance.
 
-Pull existing modules from an instance:
+Pull a module's source from an instance:
 
 ```bash
 insites-cli modules pull <module-name> dev

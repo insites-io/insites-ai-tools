@@ -63,4 +63,4 @@ insites-cli modules pull payments dev
 insites-cli constants set --name stripe_sk_key --value "sk_..." dev
 ```
 
-> **CLI STATUS:** `insites-cli modules install` is not yet available. Module installation is currently done manually.
+Modules are preinstalled per Insites instance and updated through the Insites console; there is no CLI command to install or uninstall modules.
