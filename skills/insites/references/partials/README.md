@@ -68,10 +68,10 @@ app/views/partials/
 └── layouts/             # Layout sub-components
 ```
 
-## Rules
+## Guidelines
 
-- Partials contain ALL HTML/JS/CSS presentation
-- NO GraphQL calls in partials (data comes from pages via parameters)
-- Use plain English text for user-facing strings
-- Use `render` for display-only partials
-- Use `function` for partials that return data
+- Partials hold most HTML/JS/CSS presentation; small amounts of page-specific markup may live inline in a page (see [Pages](../pages/README.md#inline-html--when-its-allowed)).
+- **Pages own data fetching.** Pages call `{% graphql %}` and pass results to partials as render arguments. Partials that need data should receive it from their caller.
+- **GraphQL inside partials — when it appears.** Real Combinate addons (notably some older `addon-*` repos) do contain partials that call `{% graphql %}` directly, and `{% function %}`-style partials that exist specifically to encapsulate a query. Treat those as legacy debt: when adding new code, fetch in the page; when working in an existing addon, follow the addon's local convention until you can refactor it. Don't introduce *new* GraphQL-in-partial code in `app-portal` / `app-seedling`-style repos.
+- Use plain English text for user-facing strings.
+- Use `{% render %}` for display-only partials; use `{% function %}` for partials that return data.
