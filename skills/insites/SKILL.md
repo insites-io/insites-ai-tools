@@ -352,7 +352,11 @@ Use the decision trees above to identify which category applies, then load the m
 ### External Integrations
 | Category | Reference |
 |----------|-----------|
-| API Calls | `references/api-calls/` |
+| API Calls (outbound HTTP) | `references/api-calls/` |
+| API Endpoints (inbound, JSON) | `references/api-endpoints/` |
+| CRM Controllers | `references/crm-controllers/` |
+| User Profile Types | `references/user-profile-types/` |
+| Payments (Stripe) | `references/payments/` |
 
 ### Developer Tools
 | Category | Reference |
