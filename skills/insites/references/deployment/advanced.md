@@ -253,4 +253,3 @@ insites-cli logs production --filter slow_query
 
 - [CLI Advanced Techniques](../cli/advanced.md)
 - [Deployment Patterns](./patterns.md)
-- [Testing Advanced](../testing/advanced.md)

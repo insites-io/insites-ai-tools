@@ -394,4 +394,4 @@ If pattern detected, investigate and fix.
 - [Background Jobs - Patterns](./patterns.md)
 - [Background Jobs - Gotchas](./gotchas.md)
 - [insites-cli Reference](../cli/api.md)
-- [Liquid Filters](../../liquid/filters/index.md)
+- [Liquid Filters](../liquid/filters/README.md)

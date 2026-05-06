@@ -335,12 +335,7 @@ Use try/catch for safe operations (parsing, type coercion):
 
 ## See Also
 
-- [graphql Tag Reference](/liquid/tags/graphql)
-- [function Tag Reference](/liquid/tags/function)
-- [render Tag Reference](/liquid/tags/render)
-- [transaction Tag Reference](/liquid/tags/transaction)
-- [try/catch Tag Reference](/liquid/tags/try-catch)
-- [session Tag Reference](/liquid/tags/session)
-- [background Tag Reference](/liquid/tags/background)
-- [parse_json Filter Reference](/liquid/filters/parse-json)
-- [Liquid Tag Overview](/liquid/tags)
+- [Liquid Tags — overview](README.md)
+- [Liquid Tags — API reference](api.md) (covers `graphql`, `function`, `render`, `transaction`, `try`/`catch`, `session`, `background`, etc.)
+- [Liquid Tags — patterns](patterns.md)
+- [Liquid Filters — `parse_json`](../filters/api.md)

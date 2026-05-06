@@ -263,5 +263,4 @@ insites-cli deploy production  # Not "insites-cli deploy"
 ## See Also
 
 - [CLI Gotchas](../cli/gotchas.md)
-- [Testing Troubleshooting](../testing/gotchas.md)
 - [Deployment Patterns](./patterns.md)
