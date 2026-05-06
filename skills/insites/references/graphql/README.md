@@ -89,6 +89,32 @@ query search($page: Int = 1, $limit: Int = 20, $title: String) {
 
 5. For inline queries (no separate file), see [patterns.md](patterns.md).
 
+## User profiles and `user_profile_types/`
+
+User-attached data (typically the editable parts of a "person" record — first name, last name, role, custom fields) lives in `user_profile_types/` schemas, not in the `users` table itself. Each profile type is a YAML file at `modules/<name>/public/user_profile_types/<type>.yml` declaring its properties. Profiles are queried alongside users via `related_record`:
+
+```graphql
+query me {
+  users(per_page: 1, filter: { id: { value: $current_user_id } }) {
+    results {
+      id
+      email
+      profile: related_record(
+        table: "modules/dashboard/public/user_profile_types/crm_contact",
+        join_on_property: "id",
+        foreign_property: "user_id"
+      ) {
+        first_name: property(name: "first_name")
+        last_name: property(name: "last_name")
+        role: property(name: "role")
+      }
+    }
+  }
+}
+```
+
+A user can have **multiple profile records** of different types (e.g. a `crm_contact` profile and a separate `staff_member` profile). Filter by profile type when joining if more than one might exist; otherwise the first matching profile is returned. Property accessors (`property`, `property_float`, `property_upload`, etc.) read typed values from the profile record exactly as they do for any other record.
+
 ## See Also
 
 - [configuration.md](configuration.md) -- file structure, naming, variable types, and invocation syntax
