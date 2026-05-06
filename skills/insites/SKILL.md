@@ -390,31 +390,47 @@ Statements within `{% liquid %}` blocks must stay on a single line each — line
 
 ## Project Structure
 
+Insites projects organise code by **module**, not by a flat root layout. Every project has a top-level `modules/` directory containing one or more module folders (e.g. `modules/dashboard/`, `modules/website/`). Each module follows the same internal structure under `modules/<name>/public/`.
+
 ```
 project-root/
-├── app/
-│   ├── assets/                    # Static files (images, fonts, styles, scripts)
-│   ├── views/
-│   │   ├── pages/                 # Controllers (no HTML here)
-│   │   ├── layouts/               # Wrapper templates
-│   │   └── partials/              # Reusable template snippets (HTML lives here)
-│   ├── lib/
-│   │   ├── commands/              # Business logic (build → check → execute)
-│   │   ├── queries/               # Data retrieval wrappers
-│   │   ├── events/                # Event definitions
-│   │   └── consumers/             # Event handlers
-│   ├── schema/                    # Database table definitions (YAML)
-│   ├── graphql/                   # GraphQL query/mutation files (.graphql)
-│   ├── emails/                    # Email templates
-│   ├── smses/                     # SMS templates
-│   ├── api_calls/                 # Third-party API integrations
-│   ├── migrations/                # Data seeding and schema migrations
-│   ├── authorization_policies/    # Access control policies
-│   └── config.yml                 # Feature flags and configuration
-├── modules/                       # Downloaded/custom modules (read-only)
-├── .insites                           # Environment endpoints/project root sentinel file
-└── package.json                   # (optional) Node.js dependencies
+├── app.yml                            # Project-level configuration
+├── modules/
+│   ├── <module>/                      # e.g. dashboard, website, portal
+│   │   ├── public/
+│   │   │   ├── views/
+│   │   │   │   ├── pages/             # Routed Liquid pages
+│   │   │   │   ├── layouts/           # Page wrappers (e.g. portal_default)
+│   │   │   │   └── partials/          # Reusable template snippets
+│   │   │   ├── forms/                 # Form definitions (YAML + Liquid callback_actions)
+│   │   │   ├── graphql/               # Queries + mutations grouped by domain
+│   │   │   ├── authorization_policies/
+│   │   │   ├── api_calls/             # Third-party API integrations grouped by service
+│   │   │   ├── schema/                # Database table definitions (YAML)
+│   │   │   ├── user_profile_types/    # Custom user-profile schemas
+│   │   │   ├── emails/                # Email templates
+│   │   │   ├── migrations/            # Data seeding and schema migrations
+│   │   │   └── assets/                # Module-scoped JS/CSS/images
+│   │   └── test/                      # Module-level test fixtures (if any)
+│   └── <another-module>/
+└── package.json                       # (optional) Node.js dependencies
 ```
+
+**Module-prefixed paths.** Render, include, and graphql calls always start with the module name:
+
+```liquid
+{% render 'modules/dashboard/path/to/partial' %}
+{% include 'modules/dashboard/path/to/partial' %}
+{% graphql x = 'modules/dashboard/account/get_user' %}
+```
+
+For the full canonical layout reference (per-directory purpose, naming conventions, examples), see [`references/project-structure.md`](references/project-structure.md).
+
+### Cross-module conventions
+
+- **No `app/lib/commands/` directory.** State-changing logic lives inline in pages or in `forms/<name>.liquid` `callback_actions` blocks.
+- **No `app/lib/queries/` directory.** GraphQL files live at `modules/<module>/public/graphql/<domain>/<operation>.graphql` and are called directly from pages or forms.
+- **Layouts are namespaced.** E.g. `portal_default`, `portal_form`, `dashboard_default`.
 
 ## File Extension Conventions
 
