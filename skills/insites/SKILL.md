@@ -362,8 +362,8 @@ Use the decision trees above to identify which category applies, then load the m
 
 ## Critical Architecture Rules
 
-### 1. Pages are controllers — no HTML in page files
-Page files fetch data via `{% graphql %}` and delegate rendering to partials via `{% render %}`. Partials hold all HTML/JS/CSS presentation. Putting HTML directly in a page is a hard rule the audit enforces.
+### 1. Pages are primarily controllers — extract reusable markup into partials
+Pages fetch data via `{% graphql %}` and delegate the bulk of rendering to partials via `{% render %}`. Small amounts of page-specific inline HTML are acceptable in practice (a wrapper element, a one-off heading, the body of a `.json.liquid` page) — what's *not* acceptable is duplicating markup that other pages could reuse, or putting form/card/list markup inline. Rule of thumb: more than ~10 lines of HTML in a page → extract a partial.
 → `references/pages/`, `references/partials/`
 
 ### 2. GraphQL only in pages
