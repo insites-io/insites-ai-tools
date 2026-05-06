@@ -4,57 +4,44 @@ All notable changes to the Insites Logic Engine will be documented in this file.
 
 ## [1.1.0] - 2026-05-06
 
-### Repository
+### New Feature
 
-- **Renamed** `insites-ai-tools` → `insites-logic-engine` to align with the npm package identifier (`@insites/logic-engine`). Install URLs in `install.sh`, `claude-install.sh`, `install-examples.sh`, and `command/insites.md` updated; `engine/package.json` repository URL repointed; default branch corrected from `master` → `main` (the previous URLs were silently broken).
+- **`@insites/logic-engine` npm package** — new TypeScript library that loads the rule and decision corpus, evaluates `when`/`then` decisions, renders Eta scaffold templates, and exposes an MCP-server entry point. Source under `engine/`.
+- **Versioned rule + decision corpus** — 9 markdown rule files, 24 JSON decision files (12 module-detection + 6 feature-pattern + 6 scaffold), Eta scaffold templates, and an audit folder grounding each rule against real production codebases (`app-portal`, `app-seedling`). Source under `logic-engine/`.
+- **`api-endpoints/` reference** — building inbound JSON endpoints under the V2 surface (`api/_external/v2/<resource>/<action>.json.liquid`), with auth, method, status-code, error, and pagination conventions.
+- **`crm-controllers/` reference** — controllers that conform to the CRM module's V2 surface using the `path:` front-matter alias.
+- **`user-profile-types/` reference** — schema location, GraphQL read via `related_record` + property accessors, write via `record_create`/`record_update`, multi-profile users.
+- **`payments/` reference** — Stripe integration assembled from `api_calls/`, `constants/`, and form `callback_actions`. Worked Checkout Session example and webhook receiver shape.
+- **CRM module reference** — V2 REST endpoints, custom and system fields, webhook coverage, `globals/` (tasks, activities, attachments, event_streams), and a field-by-field `schema.md`.
+- **CMS module reference** — `metadata.md` covering 10 object types (Pages, Layouts, Partials, Web Files, Globals, Collections, Emails, SMS, Authorization Policies), file-based stance, IIA admin paths, and override patterns.
+- **Data module reference** — V2 endpoints for user-defined databases, schema discovery, bulk-loop patterns, and an IIA configuration walkthrough.
+- **GraphQL profile queries** — new "User profiles and `user_profile_types/`" section explaining how profile schemas are queried via `related_record` + property accessors, with multi-profile-type users called out explicitly.
+
+### Improvement
+
+- **Repository renamed** `insites-ai-tools` → `insites-logic-engine` to align with the npm package identifier `@insites/logic-engine`. Install URLs and the GitHub repository updated; the previous URLs remain redirected for a transition period.
 - **README rewritten** around the two deliverables: `skills/insites/` for LLM consumption, `engine/` + `logic-engine/` for programmatic tooling. Replaced the stale generic decision-tree list with the actual category index from `SKILL.md`.
+- **Modules-based project layout** — replaced the flat `app/views/...` tree with the layout real Combinate projects actually use: `modules/<name>/public/{views,forms,graphql,authorization_policies,api_calls,schema,user_profile_types,emails,migrations,assets}/`. Added `references/project-structure.md` with explicit callouts that `app/lib/{commands,queries,validations,helpers}/` do not exist in canonical Combinate.
+- **State changes via `callback_actions`** — replaced the older "command pattern (build → check → execute)" framing with form definitions at `modules/<name>/public/forms/<name>.liquid`. YAML schema declares fields and per-field validation; a Liquid `callback_actions` block runs the GraphQL mutations and side effects. Worked `update_password` example covering `form_set_error` / `form_set_field_error` / `form.errors`.
+- **Pages rule calibrated** — softened the strict "no HTML in pages" rule to match real practice. Tiny page-specific markup, JSON-page bodies, and short redirect/error pages may live inline; reusable markup belongs in partials, with ~10 lines of HTML as the extract-it threshold.
+- **Partials rule calibrated** — pages own data fetching for new code, with addon legacy-debt explicitly documented. Existing addons that contain GraphQL inside partials are now described as legacy patterns to follow locally rather than as outright wrong.
+- **White-label cleanup** — dropped `@platform-os/*` npm references and `platform-os` → `insites` tag samples. Calibrated `SKILL.md` tone (removed dramatic framing, demoted all-caps emphasis to prose, trimmed marketing copy from Section 1).
+- **CLI reference rewritten** against the actual `insites-cli help` output (see also Bug Fix below).
+- **Removed dead reference areas** — deleted `references/commands/` and `references/events-consumers/` (patterns sourced from PlatformOS docs that don't exist in canonical Combinate). Cleaned dangling cross-references in `pages/`, `partials/`, `background-jobs/`, and `authentication/` docs.
 
-### Logic Engine v0 (engine + corpus)
+### Bug Fix
 
-- **Added** the `@insites/logic-engine` npm package skeleton (`engine/`) — TypeScript library that loads the corpus, evaluates `when`/`then` decisions, renders Eta scaffold templates, and exposes an MCP server entry point.
-- **Added** the `logic-engine/` corpus: `rules/` (9 markdown constraint files), `decisions/` (12 module-detection + 6 feature-pattern + 6 scaffold), `templates/`, and `audit/` (cross-repo grounding for v0 — 25 rules, R-1 to R-25).
-- **Fixed** corpus correctness (PR #1 follow-up): discriminated-union Zod schema for decision kinds (C-1), `prepack` script that bundles the corpus into the npm package (C-3), regex tightening, integration tests. 23/23 vitest tests passing.
-
-### Skill rewrite — `skills/insites/`
-
-The v1.1.0 release rewrites the Insites skill against canonical Combinate codebases (`app-portal`, `app-seedling`) instead of upstream PlatformOS docs. The audit-grounded changes:
-
-- **Project layout** (Skill 01): replaced flat `app/views/...` with the modules-based layout used in real Combinate projects — `modules/<name>/public/{views,forms,graphql,authorization_policies,api_calls,schema,user_profile_types,emails,migrations,assets}/`. Added `references/project-structure.md` covering path conventions, file naming, and explicit callouts that `app/lib/{commands,queries,validations,helpers}/` do not exist.
-- **Drop legacy patterns** (Skill 02): deleted `references/commands/` (R-4) and `references/events-consumers/` (R-16). `SKILL.md` Critical Architecture Rule #3 retitled from "Command pattern" to "State changes live in form `callback_actions`". Cleaned dangling cross-references in `pages/`, `partials/`, `background-jobs/`, `authentication/`. Also dropped misleading "`insites-cli modules install` is not yet available" framing (R-8).
-- **Pages** (Skill 03): softened R-1 from absolute "no HTML in pages" to a calibrated rule — small page-specific markup, JSON-page bodies, and short redirect/error pages allow inline HTML; reusable markup belongs in partials (~10-line extract threshold).
-- **Partials** (Skill 04): softened R-2 from "no GraphQL in partials" to the canonical rule — pages own data fetching for new code; existing addons that contain GraphQL-in-partial code are documented as legacy debt rather than wrong.
-- **Forms** (Skill 05): replaced the older "command pattern (build → check → execute)" framing with form definitions at `modules/<name>/public/forms/<name>.liquid` — YAML schema with per-field validation + Liquid `callback_actions` block for state changes and side effects. Added a worked `update_password` example covering `form_set_error` / `form_set_field_error` / `form.errors`.
-- **GraphQL** (Skill 06): added a "User profiles and `user_profile_types/`" section to `graphql/README.md` documenting how profile schemas are queried via `related_record` + property accessors, with multi-profile-type users called out explicitly.
-- **Authorization** (Skill 07): corrected the truthy/falsy framing — policies are not Liquid `return true/false` controllers; the platform compares the file's *output* as a string against the literal `"true"`. Switched canonical examples to single-line `{%- ... -%}` whitespace-trimmed Liquid that emits exactly `true` or `false`. Documented three concrete failure modes (trailing newline, truthy-object return, policy-name typo).
-- **New reference dirs** (Skills 08, 10–12): lean starter `README.md`s for `api-endpoints/` (inbound JSON), `crm-controllers/` (path-aliased CRM V2 controllers), `user-profile-types/` (schema → GraphQL property-accessor pattern), and `payments/` (Stripe via api_calls + constants + form callback_actions). Skill 09 (`api-calls/`) verified as already complete.
-
-### CRM, CMS, Data module references
-
-Three full reference directories added during the v1.1.0 cycle (one per module), each with the standard six-file shape (`README/api/configuration/patterns/gotchas/advanced.md`) plus module-specific extensions:
-
-- **CRM** — V2 REST endpoints, custom/system fields, webhook coverage, `globals/` (tasks, activities, attachments, event_streams), `schema.md` field-by-field reference.
-- **CMS** — `metadata.md` (10 object types), file-based stance, IIA admin paths, override patterns.
-- **Data** — V2 endpoints for user-defined databases, schema discovery, bulk-loop patterns, IIA configuration walkthrough.
-
-### CLI reference
-
-- **Rewritten** `cli/api.md` against actual `insites-cli help` output — fixed 8 inaccuracies, removed 1 invented command, added 6 missing commands.
-- **Removed** all references to a non-existent `insites-cli test` command (R-23) and the entire `references/testing/` directory.
-
-### White-label cleanup
-
-- Dropped `@platform-os/*` npm references and `platform-os` → `insites` tag samples (R-3 / R-9 / R-13).
-- Calibrated `SKILL.md` tone — removed dramatic framing, demoted all-caps emphasis to prose.
-- Trimmed Section 1 marketing copy from `SKILL.md`.
-
-### QA
-
-- 26 broken markdown links across `skills/` repaired in a single sweep (TW-25999899). Post-fix scan returns 0 broken across 812 relative links in 201 files. Cross-references between reference modules validated against `SKILL.md`.
+- **Authorization policy output invariant** — corrected the truthy/falsy framing. Policies are not Liquid `return true/false` controllers; the platform compares the file's *output* as a string against the literal `"true"`. Canonical examples now use single-line `{%- ... -%}` whitespace-trimmed Liquid that emits exactly `true` or `false`. Three concrete failure modes documented: trailing newline, returning a Liquid truthy object, and policy-name typos.
+- **Logic Engine v0 correctness** — discriminated-union Zod schema for decision kinds (so all 12 module-detection decisions actually load instead of failing silently), `prepack` script that bundles the corpus into the published npm package, and regex tightening on partial-resolution rules. 23/23 vitest tests passing.
+- **CLI reference accuracy** — `cli/api.md` had 8 inaccurate command signatures, 1 invented command (`insites-cli test`), and 6 missing real commands. Rewritten against the actual `insites-cli help` output.
+- **26 broken markdown links** across `skills/` repaired in a single sweep. Post-fix scan: 0 broken across 812 relative links in 201 files.
+- **Misleading "modules install is not yet available" framing** — replaced across `cli/patterns.md`, `cli/advanced.md`, and `configuration/README.md` with accurate prose ("modules are preinstalled per Insites instance and updated through the Insites console; there is no CLI command to install or uninstall modules").
+- **Install URL branch reference** — install scripts pointed at `master`, but the repository's default branch is `main` — the old install commands were silently broken. Corrected to `main` everywhere.
 
 ### Follow-ups (not in this release)
 
-- TW-26199053 — CI guard against audit-regressing patterns (no `app/lib/commands/`, no flat `app/views/`, no `Bearer` prefix in V2 auth examples, whitespace-trimmed authorization-policy output, etc.).
-- 5 interactive QA subtasks remain on TW-25999897: install + verify with Claude, deploy generated code to staging, test 8 decision trees against real modules, fresh-install on clean machine, code-review skill against 7 module types.
+- TW-26199053 — CI guard against audit-regressing patterns (prevents reintroduction of `app/lib/commands/`, flat `app/views/`, `Bearer ` prefix in V2 auth examples, multi-line authorization-policy output, etc.).
+- 5 interactive QA subtasks remain on TW-25999897: install + verify with Claude, deploy generated code to staging, test SKILL.md decision trees against real modules, fresh-install on clean machine, code-review skill against 7 module types.
 
 ## [1.0.0] - 2026-03-19
 
