@@ -271,4 +271,7 @@ for `controller` undercounts the inventory by 35. Do not filter on it.
 ---
 
 Generated from module source. Counts are per installed module version, so they move
-between releases: regenerate rather than trusting a copied figure.
+between releases: regenerate rather than trusting a copied figure —
+`node tools/generate-alias-inventory.mjs --write <module-repo> [...more]` rebuilds this
+file from local checkouts, and `node tools/lint-controller-contracts.mjs` checks contract
+front matter and catches doc references to aliases that no partial declares.
