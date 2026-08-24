@@ -38,6 +38,22 @@ The decision trees below map common developer questions to the relevant referenc
 
 ---
 
+### "I'm building ON an instance from outside — agency / external builder track"
+
+```
+Building on a hosted instance (not developing a module in this repo)?
+├─ Start here — what an instance is, the four traps, build order → building-on-insites/README.md
+├─ Which API + which credential (instance key vs Console CLI token) → building-on-insites/01-two-apis-two-credentials.md
+├─ Call module logic from Liquid ({% function %}, aliases)          → building-on-insites/02-calling-a-controller.md
+│    └─ Deep in-Liquid reference (auth context, arg passing)        → api/calling-from-liquid.md
+├─ Create/update pages via admin GraphQL                            → building-on-insites/03-pages.md
+├─ Lock a page down (controller calls bypass endpoint policies)     → building-on-insites/04-authorization.md
+├─ Store data (check what modules already store first)              → building-on-insites/05-storing-data.md
+├─ Handle errors + the silent failures that return 200              → building-on-insites/06-errors-and-silent-failures.md
+├─ Look up a controller alias (all 225, by module)                  → building-on-insites/reference/alias-inventory.md
+└─ Full controller contract example (crm/controller/contacts/list)  → building-on-insites/reference/crm-contacts-list.md
+```
+
 ### "I need to build a page/endpoint"
 
 ```
@@ -285,6 +301,13 @@ Need performance?
 ## Categories Index
 
 Use the decision trees above to identify which category applies, then load the matching reference below. Each reference directory contains: `README.md`, `configuration.md`, `api.md`, `patterns.md`, `gotchas.md`, `advanced.md`.
+
+### Building on an Instance (external builder track)
+| Category | Reference |
+|----------|-----------|
+| Guided track (README, credentials, controllers, pages, auth, data, errors) | `references/building-on-insites/` |
+| Controller alias inventory (225 aliases) | `references/building-on-insites/reference/alias-inventory.md` |
+| Contract template (crm/controller/contacts/list) | `references/building-on-insites/reference/crm-contacts-list.md` |
 
 ### Views & Routing
 | Category | Reference |
