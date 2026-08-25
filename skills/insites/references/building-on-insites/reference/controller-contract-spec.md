@@ -1,69 +1,73 @@
-# Controller contract — front-matter specification
+# Controller contract — endpoint doc-data specification
 
-Every controller partial carries a machine-readable contract in its front matter. The
-contract is the **single source of truth** for what the controller accepts, returns and
-does on bad input. Generated documentation (the instance's `/admin/api` Controller tab and
-`.md` output) renders from it; a drift check compares it against the code.
+Every documented endpoint declares a machine-readable **contract** — what its controller
+accepts, returns, and does on bad input (including the silent-failure traps). The contract
+is the source of truth the instance's API docs render from: the `/admin/api` Controller
+Contract section and the `.md` twin display it per endpoint.
 
 The worked example this spec was proven against is
 [`crm/controller/contacts/list`](crm-contacts-list.md).
 
-## Carrier
+## Carrier — the endpoint doc-data partial
 
-The contract lives under `metadata:` in the controller partial's front matter, beside the
-existing `path:` alias. Partial `metadata` is deploy-safe (the sitemap partials in
-`insites_core` already use it) and queryable:
+The contract is a `contract` key on the endpoint's **existing doc-data partial** — the same
+`{% parse_json content %}` object that already carries `title`, `method`, `url`,
+`controller_name`, `params`, `example_payload` and `example_response`, and that the docs
+renderer already loads by path with `{% function content = <endpoint-path> %}`.
 
-```graphql
+This is the only mechanism that works. A controller's own front matter cannot carry the
+contract: controllers live under `private/`, and a private partial's metadata is not
+readable — `admin_liquid_partials` (the GraphQL query) returns `public/` partials only, and
+`{% function %}` returns a partial's executed output, not its front matter. The endpoint
+doc-data partial, by contrast, is read by `{% function %}` and *returns* its data, so a
+`contract` key on it is available to the renderer as `content.contract` with no extra query.
+
+Add the `contract` key to the endpoint's doc-data (example: CRM contacts list, at
+`modules/insites_core/.../insites_api/external_api/contacts/get_contacts.liquid`):
+
+```liquid
+{% parse_json content %}
 {
-  admin_liquid_partials(
-    per_page: 200
-    filter: { metadata: [{ attribute: { key: "kind", value: "controller" } }] }
-  ) {
-    results { physical_file_path metadata }
+  "title": "Get Contacts",
+  "method": "get",
+  "url": "/crm/api/v2/contacts",
+  "controller_name": "crm/controller/contacts/list",
+  "params": ["page", "size", "sort_by", "sort_order", "search_by", "keyword", "exact"],
+  "example_payload": { "page": 1, "size": 10 },
+  "example_response": [ /* ... */ ],
+
+  "contract": {
+    "module": "module-crm",
+    "stability": "stable",
+    "safe_in_function": true,
+    "http_twin": "GET /crm/api/v2/contacts",
+    "summary": "Returns a page of CRM contacts with relations and custom fields inflated.",
+    "returns": [
+      { "name": "total_entries", "type": "integer", "notes": "Total matching contacts, not the page size." }
+    ],
+    "errors": [
+      { "condition": "GraphQL query failure", "response": "errors array in the return value; the HTTP twin answers 400 (never 5xx)." }
+    ],
+    "silent_failures": [
+      { "input": "No keyword", "behavior": "No filter — returns every contact on the instance, size per page, HTTP 200." },
+      { "input": "Dotted search_by (company.name)", "behavior": "Filter discarded; every contact returned." }
+    ]
   }
 }
+{% endparse_json %}
+
+{% return content %}
 ```
 
-Two keys sit flat at the top of `metadata` so discovery filters can target them; the rest
-nests under `contract`:
-
-```yaml
----
-  path: crm/controller/contacts/list
-  metadata:
-    kind: controller
-    alias: crm/controller/contacts/list
-    contract:
-      module: module-crm
-      stability: stable            # stable | beta | deprecated
-      safe_in_function: true       # false when the response handler is ungated or there is no {% return %}
-      http_twin: GET /crm/api/v2/contacts
-      summary: Returns a page of CRM contacts with relations and custom fields inflated.
-      params:
-        - name: page
-          type: integer
-          default: 1
-          description: 1-indexed page number.
-      returns:
-        - name: total_entries
-          type: integer
-          notes: Total matching records, not the page size.
-      errors:
-        - condition: <what makes it fail>
-          response: <errors array shape; status when format=json>
-      silent_failures:
-        - input: <what you write>
-          behavior: <what actually happens, incl. data-exposure notes>
----
-```
+The renderer reads `content.contract` directly — no separate query, no controller metadata.
+The `params` / `example_payload` the renderer already renders stay where they are; the
+`contract` adds the guarantees (returns, errors, silent failures) the endpoint docs did not
+previously carry.
 
 ## Field semantics
 
 | Field | Rule |
 |---|---|
-| `kind` | Literal `controller`. Flat, for the discovery filter. |
-| `alias` | Must equal the partial's `path:` value. Flat, so a doc page can filter for one alias. |
 | `module` | Repo name (`module-crm`, `module-data`, …). |
 | `stability` | `stable`, `beta`, or `deprecated`. |
 | `safe_in_function` | `true` only when the controller both returns a value and gates its response handler. The two module-data write controllers with no `{% return %}` are `false`. |
@@ -90,14 +94,14 @@ is derivable from the alias. Storing them per-file guarantees they rot.
 
 ## Rendering
 
-The module-api docs renderer resolves the contract by alias via `admin_liquid_partials`
-and renders it as the Controller tab (HTML) and contract tables in the `.md` twin:
-arguments, returns, errors, silent failures — same section order as
-[crm-contacts-list.md](crm-contacts-list.md).
+The module-api docs renderer reads `content.contract` from the endpoint doc-data it already
+loads, and renders it as the Controller Contract section (HTML) and contract tables in the
+`.md` twin: returns, errors, silent failures — same section order as
+[crm-contacts-list.md](crm-contacts-list.md). Endpoints without a `contract` key render
+exactly as before.
 
 ## Drift checks (CI, proposed)
 
-- Contract coverage: % of aliases whose metadata carries a complete contract (target 100%).
-- Reference integrity: every alias in generated docs resolves to a partial declaring it.
-- Drift: every `params.*` key read in the source appears in `contract.params`, and vice versa.
-- Alias equality: `metadata.alias` equals `path:` in the same file.
+- Contract coverage: % of documented endpoints whose doc-data carries a complete `contract`.
+- Reference integrity: every `controller_name` in the doc-data resolves to a partial declaring that `path:` alias.
+- Drift: every argument the controller reads is reflected in the contract, and vice versa.
