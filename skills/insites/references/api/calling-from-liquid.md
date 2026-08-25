@@ -4,7 +4,7 @@ Inside Insites Liquid (in a page or partial of your own app), you can invoke the
 
 It also bypasses the V2 API's authentication policy. **That's a feature, not a bug** — the calling page is expected to gate access via its own `authorization_policies:` front matter — but it requires care. See *Auth context* below.
 
-This doc is the canonical reference for the in-Liquid pattern. Module-specific docs (e.g. [`../modules/crm/patterns.md`](../modules/crm/patterns.md)) link here rather than re-explaining it.
+This doc is the canonical reference for the in-Liquid pattern. For the guided external-builder track (credentials, pages, authorization, silent failures), see [building-on-insites](../building-on-insites/README.md). Module-specific docs (e.g. [`../modules/crm/patterns.md`](../modules/crm/patterns.md)) link here rather than re-explaining it.
 
 ---
 

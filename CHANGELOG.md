@@ -2,6 +2,20 @@
 
 All notable changes to the Insites Logic Engine will be documented in this file.
 
+## [1.1.1] - 2026-08-25
+
+### New Feature
+
+- **Building on an instance — external-builder track** (`skills/insites/references/building-on-insites/`). The controller-layer documentation pack an agency needs to build on a hosted instance unaided: a README and six mechanism pages (two APIs / two credentials, calling a controller, pages, authorization, storing data, errors and silent failures), a curated `llms.txt`, a paste-in `AGENTS.md`, the 225-alias inventory, and a full `crm/controller/contacts/list` contract. Routed from `SKILL.md` via a dedicated decision tree and Categories Index entry. Every code example is verified against a live instance.
+- **Controller contract specification** (`building-on-insites/reference/controller-contract-spec.md`). Defines the machine-readable contract (stability, `safe_in_function`, HTTP twin, returns, errors, silent failures) carried on each endpoint's doc-data partial and rendered into the instance's API docs.
+- **Testing reference** (`skills/insites/references/testing/`). How to write `insites_test` Liquid tests and run them with `insites-cli test run`: the file-naming and `contract` rules that prevent silent passes, where module tests live (private = CLI-only), the assertion catalogue, `--isolate`/CI gating, and troubleshooting. Cross-linked from the CLI reference.
+- **Repo tooling** (`tools/`). `generate-alias-inventory.mjs` rebuilds the controller-alias inventory from local module checkouts; `lint-controller-contracts.mjs` validates contract front matter and catches doc references to aliases no partial declares. Both read module repos, never modify them.
+
+### Bug Fix
+
+- **Controller contract source corrected.** The initial design stored the contract in controller front matter and read it via `admin_liquid_partials` — which returns only `public/` partials, so a private controller's contract could never be read and the docs would silently render nothing. The specification now carries the contract on the endpoint's doc-data partial, read the same way the docs already read every per-endpoint field.
+- **Documented the custom-field write-side silent failure.** A parsed-object value on a `geojson`-typed custom-field key returns HTTP 200 with the whole `custom_field` block null — valid sibling keys included. Added to the silent-failures page with its verified mechanism and the read-back-after-write defense.
+
 ## [1.1.0] - 2026-05-06
 
 ### New Feature

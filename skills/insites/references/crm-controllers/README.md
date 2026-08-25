@@ -44,3 +44,7 @@ For non-CRM resources (your own product's data), use a generic API endpoint unde
 - [`api/authentication.md`](../api/authentication.md) — V2 token format
 - [`api/calling-from-liquid.md`](../api/calling-from-liquid.md) — how `path:` aliases resolve
 - [`api-endpoints/`](../api-endpoints/README.md) — generic (non-CRM) API endpoints
+
+---
+
+A complete, verified controller contract — arguments, returns, errors, and the silent-failure table for `crm/controller/contacts/list` — lives at [building-on-insites/reference/crm-contacts-list.md](../building-on-insites/reference/crm-contacts-list.md). Use it as the template shape for documenting any controller.
