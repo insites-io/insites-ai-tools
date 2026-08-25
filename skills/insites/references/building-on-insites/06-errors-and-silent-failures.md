@@ -48,6 +48,23 @@ controller's reference rather than guess its arguments.
 dump. In development against a dozen test records that looks identical to working code; in
 production it is a data exposure that no test catches, because the page renders.
 
+## The write-side silent failure: custom fields
+
+Sending a **parsed JSON object** on a `geojson`-typed custom field key (instead of the
+supported JSON-encoded string) returns **200 with the record created and the entire
+`custom_field` block null** — including every *valid* sibling key you sent in the same
+request.
+
+The mechanism (verified live, TW#26272400): all of a record's custom fields ride one
+`record_create` mutation. The module's type switch cases on `'geo_json'` while the stored
+type is `'geojson'`, so the object falls into the generic string branch, the whole
+mutation fails on a type coercion (`Could not coerce value {...} to String`), the error is
+never checked, and the companion custom-fields record is simply never created.
+
+Send geojson values as a JSON-encoded string — `"{\"type\":\"Point\",...}"` — and they
+round-trip back as parsed objects. After a write that includes custom fields, read the
+record back and confirm the keys landed; do not trust the 200.
+
 ## How to protect yourself
 
 1. **Never ship a list page without asserting the filter took effect.** If you asked for
