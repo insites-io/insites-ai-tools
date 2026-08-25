@@ -31,6 +31,15 @@ insites-cli exec liquid dev '<code>'            # Execute Liquid snippet
 insites-cli exec graphql dev '<query>'          # Execute GraphQL query
 ```
 
+### Testing
+```bash
+insites-cli test run dev                        # Run every *_test.liquid (staging/development only)
+insites-cli test run dev -n <NAME>              # Run tests whose path contains NAME
+insites-cli test run dev --min-tests 12         # Fail unless at least 12 tests run
+insites-cli test run dev --isolate              # Roll back DB writes the tests make
+```
+See `references/testing/` for writing tests and gating CI.
+
 ### Modules
 ```bash
 insites-cli modules pull <name>               # Pull a module from instance

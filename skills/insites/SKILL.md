@@ -285,6 +285,16 @@ Need deployment?
 └─ Environment configuration → configuration/
 ```
 
+### "I need to test my Liquid (unit tests)"
+
+```
+Need to test a command, query, validator or partial?
+├─ Write a test — a partial named <name>_test.liquid that mutates the runner's contract → testing/
+├─ Run it — insites-cli test run <env> (staging/development only; deploy first)   → testing/ + cli/
+├─ Gate CI — exit code, or --min-tests <n> so an empty run fails                  → testing/
+└─ Assertions — equal / presence / includes / match / valid_object / type / …    → testing/
+```
+
 ### "I need performance optimization"
 
 ```
@@ -386,6 +396,7 @@ Use the decision trees above to identify which category applies, then load the m
 |----------|-----------|
 | CLI | `references/cli/` |
 | Deployment | `references/deployment/` |
+| Testing (insites_test + insites-cli) | `references/testing/` |
 
 ## Critical Architecture Rules
 
